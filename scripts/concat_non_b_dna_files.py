@@ -5,8 +5,11 @@ from os import path
 import pandas as pd
 
 
-def concat_nBMST_output_files(input_dir, output_file, chromosome_name):
-  file_names = glob.glob(path.join(input_dir, chromosome_name + "*.tsv"))
+def concat_nBMST_output_files(input_dir, output_file, chromosome_name, non_b_dna_type):
+  if non_b_dna_type is None:
+    file_names = glob.glob(path.join(input_dir, chromosome_name + "*.tsv"))
+  else:
+    file_names = glob.glob(path.join(input_dir, chromosome_name + "_" + non_b_dna_type + ".tsv"))
 
   df_all = pd.DataFrame()
 
@@ -31,5 +34,6 @@ if __name__ == "__main__":
   argParser.add_argument("-i", "--input_dir", type=str, required=True)
   argParser.add_argument("-o", "--output_file", type=str, required=True)
   argParser.add_argument("-c", "--chromosome_name", type=str, required=True, choices=["chrX", "chrY"])
+  argParser.add_argument("-n", "--non_b_dna_type", type=str, choices=["GQ", "MR", "STR", "APR", "IR", "DR", "Z"])
   args = argParser.parse_args()
-  concat_nBMST_output_files(args.input_dir, args.output_file, args.chromosome_name)
+  concat_nBMST_output_files(args.input_dir, args.output_file, args.chromosome_name, args.non_b_dna_type)
