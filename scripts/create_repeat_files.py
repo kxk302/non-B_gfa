@@ -38,13 +38,11 @@ def create_repeat_files(species, repeats_file, output_folder):
       if sub_label == "":
         df_label = repeats_df[ (repeats_df.label == label) & 
                                (repeats_df.chromosome == chromosome) ]
-        #print(df_label.head())
         output_file_path = path.join(output_folder, species, chromosome + "_" + label.replace("/", "_") + ".bed")
       else:
         df_label = repeats_df[ (repeats_df.label == label) & 
                                (repeats_df.sub_label.str.startswith(sub_label)) &
                                (repeats_df.chromosome == chromosome) ]
-        #print(df_label.head())
         output_file_path = path.join(output_folder, species, chromosome + "_" + label.replace("/", "_") + "_" + sub_label + ".bed")
 
       df_label.to_csv(output_file_path, columns=["chromosome", "start", "stop"], header=False, index=False, sep="\t")

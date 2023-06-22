@@ -21,13 +21,13 @@ repeat_types = [
   "Satellite_subtelo",
   "Satellite_Y-chromosome",
   "Simple_repeat",
-  "Unspecified_SAT",
-  "Unspecified_StSat_pCHT",
 ]
 
+#  "Unspecified_SAT",
+#  "Unspecified_StSat_pCHT",
 
 def summarize_repeats(species, repeats_folder, output_file):
-  zero_list = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
+  zero_list = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
   data = {
     "APR": zero_list,
     "DR": zero_list,
@@ -38,97 +38,58 @@ def summarize_repeats(species, repeats_folder, output_file):
     "Z": zero_list,
   }
 
-  repeats_length_sum = pd.DataFrame(data=data, index=repeat_types)
+  repeats_length_sum = pd.Series(data=zero_list, index=repeat_types)
   intersect_length_sum = pd.DataFrame(data=data, index=repeat_types)
 
+  # Populate repeat length Series. Add chrX and chrY values to the same cell.
+  # We'd end up with len(repeat_types) values
   for chromosome in chromosomes:
     for repeat_type in repeat_types:
-      pass
+      file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type + "_merged.bed")
+      try:
+        df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
+      except pd.errors.EmptyDataError:
+        print("The TSV file is empty. No need to update repeats length series")
+      else:
+        df["length"] = df["stop"] - df["start"] + 1
+        repeats_length_sum[repeat_type] += df["length"].sum()
 
+  # print(repeats_length_sum)
+
+  # Populate intersect length DataFrame. Add chrX and chrY values to the same cell.
+  # We'd end up with len(repeat_types) X len(non_b_dna_types) values
   for chromosome in chromosomes:
     for repeat_type in repeat_types:
       for non_b_dna_type in non_b_dna_types:
-        pass
-
-
-def summarize_single_nBMST(density_file_path, chromosome_name, chromosome_fatsa_file_path, species):
-
-  df = pd.read_csv(density_file_path, sep="\t")
-  
-  length_sum = df['count'].sum()
-  print(f'length_sum: {length_sum}')
-
-  # Get the sequence length of the chromosome from the fasta file
-  record_dict = IO.to_dict(IO.parse(chromosome_fatsa_file_path, "fasta"))
-  chromosome_sequence_length = len(record_dict[chromosome_name].seq)
-  print(f'{chromosome_name} sequence length: {chromosome_sequence_length}')
-
-  length_sum_normalized = length_sum / chromosome_sequence_length
-  print(f'length_sum_normalized: {length_sum_normalized}')
-
-  return length_sum, length_sum_normalized 
-
-
-def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir, output_file_dir):
-
-  zero_list = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
-  data = {
-    "A-Phased Repeats": zero_list,
-    "Short Tandem Repeats": zero_list,
-    "Direct Repeats": zero_list,
-    "Mirror Repeats": zero_list,
-    "Inverted Repeats": zero_list,
-    "G-Quadruplex": zero_list,
-    "Z DNA": zero_list,
-  }
-
-  chrX_length_sum = pd.DataFrame(data=data, index=species_list_for_index)
-  chrY_length_sum = pd.DataFrame(data=data, index=species_list_for_index)
-  chrX_length_sum_normalized = pd.DataFrame(data=data, index=species_list_for_index)
-  chrY_length_sum_normalized = pd.DataFrame(data=data, index=species_list_for_index)
-
-  for chromosome in chromosomes:
-    for species in species_list:
-      for non_b_dna_type in non_b_dna_types:
-        density_file_path = path.join(nBMST_output_file_dir, species, species + "_" + chromosome + "_" + non_b_dna_dict[non_b_dna_type] + "_density_final.bed" )
-        print(f'density_file_path: {density_file_path}')
-
-        chromosome_fatsa_file_path = path.join(chromosome_fasta_file_dir, species, "seqs_srcdir", chromosome + ".fa")
-        print(f'chromosome_fatsa_file_path: {chromosome_fatsa_file_path}')
-
-        length_sum, length_sum_normalized = summarize_single_nBMST(density_file_path, chromosome, 
-                                                                   chromosome_fatsa_file_path, species)
-        if chromosome == "chrX":
-          chrX_length_sum.loc[species_dict[species], non_b_dna_type] = length_sum
-          chrX_length_sum_normalized.loc[species_dict[species], non_b_dna_type] = length_sum_normalized
+        file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type + "_intersect_" + non_b_dna_type + ".bed")
+        try:
+          df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
+        except pd.errors.EmptyDataError:
+          print("The CSV file is empty")
+          print("The TSV file is empty. No need to update intersect length dataframe")
         else:
-          chrY_length_sum.loc[species_dict[species], non_b_dna_type] = length_sum
-          chrY_length_sum_normalized.loc[species_dict[species], non_b_dna_type] = length_sum_normalized
-  
-  chrX_length_sum.reset_index(inplace=True)
-  chrX_length_sum = chrX_length_sum.rename(columns = {'index': 'Species'})
-  chrX_length_sum.to_csv(output_file_dir + "/chrX.csv", float_format="%d", sep=",", index=False)
+          df["length"] = df["stop"] - df["start"] + 1
+          intersect_length_sum.loc[repeat_type, non_b_dna_type] += df["length"].sum()
 
-  chrX_length_sum_normalized.reset_index(inplace=True)
-  chrX_length_sum_normalized = chrX_length_sum_normalized.rename(columns = {'index': 'Species'})
-  chrX_length_sum_normalized.to_csv(output_file_dir + "/chrX_norm.csv", float_format="%.3f", sep=",", index=False)
+  # print(intersect_length_sum)
 
-  chrY_length_sum.reset_index(inplace=True)
-  chrY_length_sum = chrY_length_sum.rename(columns = {'index': 'Species'})
-  chrY_length_sum.to_csv(output_file_dir + "/chrY.csv", float_format="%d", sep=",", index=False)
+  # Divide intersect length table rows by corresponding repeat length table values
+  # This results in cell values beingbetween 0 and 1
+  for repeat_type in repeat_types:
+    if repeats_length_sum[repeat_type] != 0.00:
+      intersect_length_sum.loc[repeat_type] /= repeats_length_sum[repeat_type]
 
-  chrY_length_sum_normalized.reset_index(inplace=True)
-  chrY_length_sum_normalized = chrY_length_sum_normalized.rename(columns = {'index': 'Species'})
-  chrY_length_sum_normalized.to_csv(output_file_dir + "/chrY_norm.csv", float_format="%.3f", sep=",", index=False)
+  # print(intersect_length_sum)
+  intersect_length_sum.to_csv(output_file, sep="\t")
 
 
 if __name__ == "__main__":
   argParser = argparse.ArgumentParser("This script summarizes nBMST results")
 
-  argumentParser.add_argument("-s", "--species", type=str, required=True,
-                              choices=["Bonobo", "Chimpanzee", "Human", "Gorilla", "B_Orangutan", "S_Orangutan", "Siamang"])
-  argumentParser.add_argument("-f", "--repeats_folder", type=str, required=True)
-  argumentParser.add_argument("-o", "--output_file", type=str, required=True)
+  argParser.add_argument("-s", "--species", type=str, required=True,
+                         choices=["Bonobo", "Chimpanzee", "Human", "Gorilla", "B_Orangutan", "S_Orangutan", "Siamang"])
+  argParser.add_argument("-f", "--repeats_folder", type=str, required=True)
+  argParser.add_argument("-o", "--output_file", type=str, required=True)
   
   args = argParser.parse_args()
   
