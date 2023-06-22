@@ -1,7 +1,10 @@
 import argparse
+import os
 from os import path 
 
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
   
 chromosomes = ["chrX", "chrY"]
 non_b_dna_types = ["APR", "DR", "GQ", "IR", "MR", "STR", "Z"]
@@ -54,8 +57,6 @@ def summarize_repeats(species, repeats_folder, output_file):
         df["length"] = df["stop"] - df["start"] + 1
         repeats_length_sum[repeat_type] += df["length"].sum()
 
-  # print(repeats_length_sum)
-
   # Populate intersect length DataFrame. Add chrX and chrY values to the same cell.
   # We'd end up with len(repeat_types) X len(non_b_dna_types) values
   for chromosome in chromosomes:
@@ -71,7 +72,6 @@ def summarize_repeats(species, repeats_folder, output_file):
           df["length"] = df["stop"] - df["start"] + 1
           intersect_length_sum.loc[repeat_type, non_b_dna_type] += df["length"].sum()
 
-  # print(intersect_length_sum)
 
   # Divide intersect length table rows by corresponding repeat length table values
   # This results in cell values beingbetween 0 and 1
@@ -79,8 +79,15 @@ def summarize_repeats(species, repeats_folder, output_file):
     if repeats_length_sum[repeat_type] != 0.00:
       intersect_length_sum.loc[repeat_type] /= repeats_length_sum[repeat_type]
 
-  # print(intersect_length_sum)
   intersect_length_sum.to_csv(output_file, sep="\t")
+
+  # Generate heatmap, add title, and save to file
+  ax = sns.heatmap(intersect_length_sum, annot=True, fmt=".3f")
+  ax.figure.subplots_adjust(left = 0.3)
+  plt.title('Non-B DNA Density of Repeats in ' + species)
+  # Save heatmap image next to .tsv file, only with .png extension
+  output_file_without_extesion = os.path.splitext(output_file)[0]
+  plt.savefig(output_file_without_extesion + ".png")
 
 
 if __name__ == "__main__":
