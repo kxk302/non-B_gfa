@@ -18,19 +18,84 @@ non_b_dna_dict = {
     "Z": "Z DNA",
   }
 repeat_types = [
+  "DNA",
+  "DNA/Crypton",
+  "DNA/Crypton-A",
+  "DNA/Kolobok",
+  "DNA/MULE-MuDR",
+  "DNA/Merlin",
+  "DNA/PIF-Harbinger",
+  "DNA/PiggyBac",
+  "DNA/TcMar",
+  "DNA/TcMar-Mariner",
+  "DNA/TcMar-Pogo",
+  "DNA/TcMar-Tc1",
+  "DNA/TcMar-Tc2",
+  "DNA/TcMar-Tigger",
+  "DNA/hAT",
+  "DNA/hAT-Ac",
+  "DNA/hAT-Blackjack",
+  "DNA/hAT-Charlie",
+  "DNA/hAT-Tag1",
+  "DNA/hAT-Tip100",
+  "DNA/hAT-Tip100?",
+  "DNA/hAT-hAT19",
+  "DNA/hAT?",
+  "DNA?/hAT-Tip100?",
+  "LINE/CR1",
+  "LINE/Dong-R4",
+  "LINE/I-Jockey",
+  "LINE/L1",
+  "LINE/L1-Tx1",
+  "LINE/L2",
+  "LINE/Penelope",
+  "LINE/RTE-BovB",
+  "LINE/RTE-X",
+  "LTR",
+  "LTR/ERV1",
+  "LTR/ERVK",
+  "LTR/ERVL",
+  "LTR/ERVL-MaLR",
+  "LTR/Gypsy",
+  "Low_complexity",
+  "RC/Helitron",
+  "Retroposon/SVA",
+  "SINE/5S-Deu-L2",
+  "SINE/Alu",
+  "SINE/MIR",
+  "SINE/tRNA",
+  "SINE/tRNA-Deu",
+  "SINE/tRNA-RTE",
   "Satellite",
-  "Satellite_acro",
-  "Satellite_centr",
-  "Satellite_subtelo",
-  "Satellite_Y-chromosome",
+  "Satellite/Y-chromosome",
+  "Satellite/acro",
+  "Satellite/centr",
+  "Satellite/subtelo",
   "Simple_repeat",
+  "Unknown",
+  "Unspecified",
+  "rRNA",
+  "scRNA",
+  "snRNA",
+  "srpRNA",
+  "tRNA",
 ]
 
-#  "Unspecified_SAT",
-#  "Unspecified_StSat_pCHT",
+species_to_folder_dict = {
+  "B_Orangutan": "Bornean",
+  "Bonobo": "Bonobo",
+  "Chimpanzee": "Chimpanzee",
+  "Gorilla": "Gorilla",
+  "Human": "CHM13v2.0_XY",
+  "S_Orangutan": "Sumatran",
+  "Siamang": "Siamang",
+}
 
-def summarize_repeats(species, repeats_folder, output_file):
-  zero_list = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
+REPEATS_FILE_COLUMNS = [4, 5, 6, 9, 10]
+REPEATS_COLUMN_NAMES = ["chromosome", "start", "stop", "sub_label", "label"]
+
+def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file):
+  zero_list = [0.00] * len(repeat_types)
   data = {
     "APR": zero_list,
     "DR": zero_list,
@@ -48,7 +113,7 @@ def summarize_repeats(species, repeats_folder, output_file):
   # We'd end up with len(repeat_types) values
   for chromosome in chromosomes:
     for repeat_type in repeat_types:
-      file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type + "_merged.bed")
+      file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_merged.bed")
       try:
         df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
       except pd.errors.EmptyDataError:
@@ -62,7 +127,7 @@ def summarize_repeats(species, repeats_folder, output_file):
   for chromosome in chromosomes:
     for repeat_type in repeat_types:
       for non_b_dna_type in non_b_dna_types:
-        file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type + "_intersect_" + non_b_dna_type + ".bed")
+        file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_intersect_" + non_b_dna_type + ".bed")
         try:
           df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
         except pd.errors.EmptyDataError:
@@ -79,15 +144,52 @@ def summarize_repeats(species, repeats_folder, output_file):
     if repeats_length_sum[repeat_type] != 0.00:
       intersect_length_sum.loc[repeat_type] /= repeats_length_sum[repeat_type]
 
+  # Add column with the number of repeat elements in each category, per species
+  repeats_file = path.join(repeats_folder, "input", species_to_folder_dict[species] + "_FinalAnnotations_June2023_v2.sort.out")
+  repeats_df = pd.read_csv(repeats_file, sep="\t", usecols=REPEATS_FILE_COLUMNS, names=REPEATS_COLUMN_NAMES)
+  number_of_repeat_types = repeats_df['label'].value_counts().sort_index()
+
+  # Add new column
+  intersect_length_sum["number_of_repeat_types"] = number_of_repeat_types
+
+  # Add row with average non-B density per non-B type, per species
+  average_non_b_dna_density = get_average_non_b_dna_density(nbmst_output_folder)
+  average_non_b_dna_density_list = average_non_b_dna_density.tolist()
+  average_non_b_dna_density_list.append(0.00)
+  print(f'average_non_b_dna_density_list: {average_non_b_dna_density_list}')
+  intersect_length_sum.loc["avg_non_b_dna_density"] = average_non_b_dna_density_list
+
   intersect_length_sum.to_csv(output_file, sep="\t")
 
-  # Generate heatmap, add title, and save to file
-  ax = sns.heatmap(intersect_length_sum, annot=True, fmt=".3f")
-  ax.figure.subplots_adjust(left = 0.3)
-  plt.title('Non-B DNA Density of Repeats in ' + species)
-  # Save heatmap image next to .tsv file, only with .png extension
-  output_file_without_extesion = os.path.splitext(output_file)[0]
-  plt.savefig(output_file_without_extesion + ".png")
+
+def get_average_non_b_dna_density(nbmst_output_folder):
+  zero_list = [0.00] * len(non_b_dna_types)
+  average_non_b_dna_density = pd.Series(data=zero_list, index=non_b_dna_types)
+
+  # Read chrX and chrY lengths and add them to get total length
+  chrX_file_path = path.join(nbmst_output_folder, "chrX.txt")
+  chrY_file_path = path.join(nbmst_output_folder, "chrY.txt")
+
+  df_chr_x = pd.read_csv(chrX_file_path, sep="\t", names=["chr","length"])
+  df_chr_y = pd.read_csv(chrY_file_path, sep="\t", names=["chr","length"])
+
+  total_length = (df_chr_x["length"] + df_chr_y["length"])[0]
+
+  # For each non-B DNA type, and for chrX and chrY, add the
+  # non-B DNA total length to the series
+  for non_b in non_b_dna_types:
+    for chr in chromosomes:
+      file_path = path.join(nbmst_output_folder, chr + "_" + non_b + ".bed")
+      non_b_df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop", "strand"])
+      non_b_df["length"] = non_b_df["stop"] - non_b_df["start"]  + 1
+      average_non_b_dna_density[non_b] += non_b_df["length"].sum()
+
+  # Divide non-B DNA total length (for both chrX and chrY) by total length
+  # (for both chrX and chrY), so non-B DNA total length is normalized
+  print(f'total_length: {total_length}')
+  print(f'average_non_b_dna_density: {average_non_b_dna_density}')
+  print(f'average_non_b_dna_density.div(total_length): {average_non_b_dna_density.div(total_length)}')
+  return average_non_b_dna_density.div(total_length)
 
 
 if __name__ == "__main__":
@@ -96,8 +198,9 @@ if __name__ == "__main__":
   argParser.add_argument("-s", "--species", type=str, required=True,
                          choices=["Bonobo", "Chimpanzee", "Human", "Gorilla", "B_Orangutan", "S_Orangutan", "Siamang"])
   argParser.add_argument("-f", "--repeats_folder", type=str, required=True)
+  argParser.add_argument("-n", "--nbmst_output_folder", type=str, required=True)
   argParser.add_argument("-o", "--output_file", type=str, required=True)
   
   args = argParser.parse_args()
   
-  summarize_repeats(args.species, args.repeats_folder, args.output_file)
+  summarize_repeats(args.species, args.repeats_folder, args.nbmst_output_folder, args.output_file)
