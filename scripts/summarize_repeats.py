@@ -149,13 +149,19 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   repeats_df = pd.read_csv(repeats_file, sep="\t", usecols=REPEATS_FILE_COLUMNS, names=REPEATS_COLUMN_NAMES)
   number_of_repeat_types = repeats_df['label'].value_counts().sort_index()
 
-  # Add new column
+  repeats_df["length"] = repeats_df["stop"] - repeats_df["start"] + 1
+  length_of_repeat_types = repeats_df[["label", "length"]].groupby("label").sum().sort_index()
+  print(length_of_repeat_types.head())
+
+  # Add new columns
   intersect_length_sum["number_of_repeat_types"] = number_of_repeat_types
+  intersect_length_sum["length_of_repeat_types"] = length_of_repeat_types
 
   # Add row with average non-B density per non-B type, per species
   average_non_b_dna_density = get_average_non_b_dna_density(nbmst_output_folder)
   average_non_b_dna_density_list = average_non_b_dna_density.tolist()
-  average_non_b_dna_density_list.append(0.00)
+  # Add 2 more 0 values for the 2 columns added above
+  average_non_b_dna_density_list.extend([0.00, 0.00])
   print(f'average_non_b_dna_density_list: {average_non_b_dna_density_list}')
   intersect_length_sum.loc["avg_non_b_dna_density"] = average_non_b_dna_density_list
 
