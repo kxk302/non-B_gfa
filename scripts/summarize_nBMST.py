@@ -19,7 +19,6 @@ species_dict = {
   "Symphalangus_syndactylus" : "Siamang",
 }
 
-
 non_b_dna_types = ["A-Phased Repeats", "Short Tandem Repeats", "Direct Repeats", 
                    "Mirror Repeats", "Inverted Repeats", "G-Quadruplex", "Z DNA"]
 
@@ -39,19 +38,11 @@ non_b_dna_dict = {
   }
 
 def summarize_single_nBMST(nBMST_output_file_path, chromosome_name, 
-                           chromosome_fatsa_file_path, species, spacer_length_filter):
+                           chromosome_fatsa_file_path, species):
 
-  df = pd.read_csv(nBMST_output_file_path, sep="\t")
-  
-  if spacer_length_filter is None:
-    print("No spacer length filter specified")
-  else:
-    print(f'spacer length filter is {spacer_length_filter}') 
-    print(f'df.shape prior to filtering: {df.shape}')
-    df = df[df.Spacer <= spacer_length_filter]
-    print(f'df.shape after filtering: {df.shape}')
- 
-  length_sum = df['Length'].sum()
+  df = pd.read_csv(nBMST_output_file_path, sep="\t", names=["chr", "start", "stop"])
+  df["length"] = df["stop"] - df["start"] + 1
+  length_sum = df["length"].sum()
   print(f'length_sum: {length_sum}')
 
   # Get the sequence length of the chromosome from the fasta file
@@ -65,8 +56,7 @@ def summarize_single_nBMST(nBMST_output_file_path, chromosome_name,
   return length_sum, length_sum_normalized 
 
 
-def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir, 
-                        spacer_length_filter, output_file_dir):
+def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir, output_file_dir):
 
   zero_list = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
   data = {
@@ -87,15 +77,14 @@ def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir,
   for chromosome in chromosomes:
     for species in species_list:
       for non_b_dna_type in non_b_dna_types:
-        nBMST_output_file_path = path.join(nBMST_output_file_dir, species, chromosome + "_" + non_b_dna_dict[non_b_dna_type] + ".tsv" )
+        nBMST_output_file_path = path.join(nBMST_output_file_dir, species, chromosome + "_" + non_b_dna_dict[non_b_dna_type] + "_merged.bed")
         print(f'nBMST_output_file_path: {nBMST_output_file_path}')
 
         chromosome_fatsa_file_path = path.join(chromosome_fasta_file_dir, species, "seqs_srcdir", chromosome + ".fa")
         print(f'chromosome_fatsa_file_path: {chromosome_fatsa_file_path}')
 
         length_sum, length_sum_normalized = summarize_single_nBMST(nBMST_output_file_path, chromosome, 
-                                                                   chromosome_fatsa_file_path, species, 
-                                                                   spacer_length_filter)
+                                                                   chromosome_fatsa_file_path, species)
         if chromosome == "chrX":
           chrX_length_sum.loc[species_dict[species], non_b_dna_type] = length_sum
           chrX_length_sum_normalized.loc[species_dict[species], non_b_dna_type] = length_sum_normalized
@@ -125,9 +114,7 @@ if __name__ == "__main__":
   
   argParser.add_argument("-n", "--nBMST_output_file_dir", type=str, required=True)
   argParser.add_argument("-c", "--chromosome_fasta_file_dir", type=str, required=True)
-  argParser.add_argument("-f", "--spacer_length_filter", type=int, required=False)
   argParser.add_argument("-o", "--output_file_dir", type=str, required=True)
   args = argParser.parse_args()
   
-  summarize_all_nBMST(args.nBMST_output_file_dir, args.chromosome_fasta_file_dir, 
-                      args.spacer_length_filter, args.output_file_dir)
+  summarize_all_nBMST(args.nBMST_output_file_dir, args.chromosome_fasta_file_dir, args.output_file_dir)

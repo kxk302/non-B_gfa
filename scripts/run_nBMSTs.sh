@@ -1,7 +1,6 @@
 #!/bin/bash
 
-#species_list="Gorilla_gorilla Homo_sapiens Pan_paniscus Pan_troglodytes Pongo_abelii Pongo_pygmaeus Symphalangus_syndactylus"
-species_list="Gorilla_gorilla"
+species_list="Gorilla_gorilla Homo_sapiens Pan_paniscus Pan_troglodytes Pongo_abelii Pongo_pygmaeus Symphalangus_syndactylus"
 chr_list="chrX chrY"
 
 for species in ${species_list}

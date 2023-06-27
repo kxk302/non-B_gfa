@@ -17,6 +17,10 @@
    intervals, to avoid double counting them. The output file will have '_merged' added to their name, right before the
    file extesion. For example, for non_b file 'chrX_APR.bed', the script outputs 'chrX_APR_merged.bed'.
 
+   NOTE: Now that you have merged non-B DNA output files, you can also create a summary table that for each species provides
+   the total length and normalized total length of each non-B DNA type (normalized by chromosome length). The summary tables
+   are created in ./summary_output folder by running ./scripts/summarize_nBMST.sh (which call ./scripts/summarize_nBMST.py).
+
 6. Run ./scripts/intersect_repeat_files.sh (Calls 'intersect_repeat_file.sh' for each species). For each species,
    intersect_repeat_file.sh calls 'bedtools intersect' to find the overlaps between a repeat file and each of non-B
    DNA annotations APR, DR, GQ, IR, MR, STR, and Z. We have 122 repeat files for each species, and since there are 7
