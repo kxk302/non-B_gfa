@@ -29,7 +29,7 @@ def merge_input_files(pre_existing_per_window_density, non_b_dna_density_file,
   df = pd.read_csv(pre_existing_per_window_density, sep='\t')
   # This column is not needed. Drop it.
   df.drop('chr', axis=1, inplace=True)
-  # Rename column to avod clashing when joining with other dataframe
+  # Rename column to avoid clashing when joining with other dataframe
   df.rename(columns={'count': 'pre_existing_count'}, inplace=True)
   # To get the novel sequence percentage
   df['novel'] = (window_size - df['pre_existing_count']) / window_size
@@ -37,17 +37,14 @@ def merge_input_files(pre_existing_per_window_density, non_b_dna_density_file,
   # Mark rows with 'novel' less than a threshold as 0
   df['novel_label'] = df['novel'] > threshold
   df['novel_label'] = df['novel_label'].astype(int)
-  ##print(df.head(5))  
 
   df_non_b_dna = pd.read_csv(non_b_dna_density_file, sep='\t')  
   # This column is not needed. Drop it.
   df_non_b_dna.drop('chr', axis=1, inplace=True)
   # Rename column to avod clashing when joining with other dataframe
   df_non_b_dna.rename(columns={'count': 'non_b_dna_count'}, inplace=True)
-  ##print(df_non_b_dna.head(5))  
 
   df_merged = pd.merge(df, df_non_b_dna, how="inner", on=["start", "stop"])
-  ##print(df_merged.head())
   return df_merged
 
 
