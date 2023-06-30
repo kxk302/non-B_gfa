@@ -62,12 +62,19 @@ REPEAT_LABELS = [
   "Simple_repeat",
   "Unknown",
   "Unspecified",
+  "Unspecified",
+  "Unspecified",
   "rRNA",
   "scRNA",
   "snRNA",
   "srpRNA",
   "tRNA", 
 ]
+REPEAT_SUBLABELS = [""]*len(REPEAT_LABELS)
+# Set sub-labels for "Unspecified". Per email from Bob H., there is also an “Unspecified” class
+# that contains some subclasses that are satellites — they begin with ”SAT” and “StSat_pCHT”
+REPEAT_SUBLABELS[REPEAT_LABELS.index("Unspecified")]="SAT"
+REPEAT_SUBLABELS[REPEAT_LABELS.index("Unspecified") + 1]="StSat_pCHT"
 CHROMOSOMES = ["chrX", "chrY"]
 
 def create_repeat_files(species, repeats_file, output_folder):
@@ -75,9 +82,18 @@ def create_repeat_files(species, repeats_file, output_folder):
 
   for index, label in enumerate(REPEAT_LABELS):
     for chromosome in CHROMOSOMES:
-      df_label = repeats_df[ (repeats_df.label == label) &
-                             (repeats_df.chromosome == chromosome) ]
-      output_file_path = path.join(output_folder, species, chromosome + "_" + label.replace("/", "_") + ".bed")
+      sub_label = REPEAT_SUBLABELS[index]
+      print(f"label: <{label}>, sub_label: <{sub_label}>")
+
+      if sub_label == "":
+        df_label = repeats_df[ (repeats_df.label == label) &
+                               (repeats_df.chromosome == chromosome) ]
+        output_file_path = path.join(output_folder, species, chromosome + "_" + label.replace("/", "_") + ".bed")
+      else:
+        df_label = repeats_df[ (repeats_df.label == label) &
+                               (repeats_df.sub_label.str.startswith(sub_label)) &
+                               (repeats_df.chromosome == chromosome) ]
+        output_file_path = path.join(output_folder, species, chromosome + "_" + label.replace("/", "_") + "_" + sub_label + ".bed")
 
       df_label.to_csv(output_file_path, columns=["chromosome", "start", "stop"], header=False, index=False, sep="\t")
 

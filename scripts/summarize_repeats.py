@@ -5,18 +5,10 @@ from os import path
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-  
-chromosomes = ["chrX", "chrY"]
-non_b_dna_types = ["APR", "DR", "GQ", "IR", "MR", "STR", "Z"]
-non_b_dna_dict = {
-    "APR": "A-Phased Repeats",
-    "DR": "Direct Repeats",
-    "GQ": "G-Quadruplex",
-    "IR": "Inverted Repeats",
-    "MR": "Mirror Repeats",
-    "STR": "Short Tandem Repeats",
-    "Z": "Z DNA",
-  }
+
+from create_repeat_files import CHROMOSOMES as chromosomes
+from create_repeat_files import REPEATS_FILE_COLUMNS, REPEATS_COLUMN_NAMES
+
 repeat_types = [
   "DNA",
   "DNA/Crypton",
@@ -74,12 +66,24 @@ repeat_types = [
   "Simple_repeat",
   "Unknown",
   "Unspecified",
+  "Unspecified_SAT",
+  "Unspecified_StSat_pCHT",
   "rRNA",
   "scRNA",
   "snRNA",
   "srpRNA",
   "tRNA",
 ]
+non_b_dna_types = ["APR", "DR", "GQ", "IR", "MR", "STR", "Z"]
+non_b_dna_dict = {
+    "APR": "A-Phased Repeats",
+    "DR": "Direct Repeats",
+    "GQ": "G-Quadruplex",
+    "IR": "Inverted Repeats",
+    "MR": "Mirror Repeats",
+    "STR": "Short Tandem Repeats",
+    "Z": "Z DNA",
+  }
 
 species_to_folder_dict = {
   "B_Orangutan": "Bornean",
@@ -90,9 +94,6 @@ species_to_folder_dict = {
   "S_Orangutan": "Sumatran",
   "Siamang": "Siamang",
 }
-
-REPEATS_FILE_COLUMNS = [4, 5, 6, 9, 10]
-REPEATS_COLUMN_NAMES = ["chromosome", "start", "stop", "sub_label", "label"]
 
 def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file):
   zero_list = [0.00] * len(repeat_types)
@@ -114,6 +115,7 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   for chromosome in chromosomes:
     for repeat_type in repeat_types:
       file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_merged.bed")
+
       try:
         df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
       except pd.errors.EmptyDataError:
@@ -143,21 +145,47 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   for repeat_type in repeat_types:
     if repeats_length_sum[repeat_type] != 0.00:
       intersect_length_sum.loc[repeat_type] /= repeats_length_sum[repeat_type]
-
+  #
   # Add column with the number of repeat elements in each category, per species
+  #
   repeats_file = path.join(repeats_folder, "input", species_to_folder_dict[species] + "_FinalAnnotations_June2023_v2.sort.out")
   repeats_df = pd.read_csv(repeats_file, sep="\t", usecols=REPEATS_FILE_COLUMNS, names=REPEATS_COLUMN_NAMES)
-  number_of_repeat_types = repeats_df['label'].value_counts().sort_index()
+  number_of_repeat_types_tmp = repeats_df['label'].value_counts().sort_index()
 
+  # Add rows for Unspecified_SAT and Unspecified_StSat_pCHT to the number of repeat elements column
+  repeats_df_sat = repeats_df[ (repeats_df['label'] == "Unspecified") & (repeats_df['sub_label'].str.startswith("SAT")) ]
+  repeats_df_stsat = repeats_df[ (repeats_df['label'] == "Unspecified") & (repeats_df['sub_label'].str.startswith("StSat_pCHT")) ]
+  number_of_repeat_types_tmp["Unspecified_SAT"] = repeats_df_sat.shape[0]
+  number_of_repeat_types_tmp["Unspecified_StSat_pCHT"] = repeats_df_stsat.shape[0]
+  number_of_repeat_types_tmp.sort_index()
+
+  number_of_repeat_types = add_missing_indexes(number_of_repeat_types_tmp)
+  number_of_repeat_types.sort_index(inplace=True)
+
+  #
+  # Add column with the length of the repeat elements in each category, per species
+  #
   repeats_df["length"] = repeats_df["stop"] - repeats_df["start"] + 1
-  length_of_repeat_types = repeats_df[["label", "length"]].groupby("label").sum().sort_index()
-  print(length_of_repeat_types.head())
+  # Convert Dataframe to Series before passing it to add_missing_indexes
+  length_of_repeat_types_tmp = repeats_df[["label", "length"]].groupby("label").sum().T.squeeze().sort_index()
+
+  # Add rows for Unspecified_SAT and Unspecified_StSat_pCHT to the length of the repeat elements column
+  repeats_df_sat_length = repeats_df_sat["stop"] - repeats_df_sat["start"] + 1
+  repeats_df_stsat_length = repeats_df_stsat["stop"] - repeats_df_stsat["start"] + 1
+  length_of_repeat_types_tmp["Unspecified_SAT"] = repeats_df_sat_length.sum()
+  length_of_repeat_types_tmp["Unspecified_StSat_pCHT"] = repeats_df_stsat_length.sum()
+  length_of_repeat_types_tmp.sort_index()
+
+  length_of_repeat_types = add_missing_indexes(length_of_repeat_types_tmp)
+  length_of_repeat_types.sort_index(inplace=True)
 
   # Add new columns
   intersect_length_sum["number_of_repeat_types"] = number_of_repeat_types
   intersect_length_sum["length_of_repeat_types"] = length_of_repeat_types
 
+  #
   # Add row with average non-B density per non-B type, per species
+  #
   average_non_b_dna_density = get_average_non_b_dna_density(nbmst_output_folder)
   average_non_b_dna_density_list = average_non_b_dna_density.tolist()
   # Add 2 more 0 values for the 2 columns added above
@@ -166,6 +194,19 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   intersect_length_sum.loc["avg_non_b_dna_density"] = average_non_b_dna_density_list
 
   intersect_length_sum.to_csv(output_file, sep="\t")
+
+def add_missing_indexes(repeat_types_series):
+  existing_indexes = set(repeat_types_series.index.tolist())
+  all_indexes = set(repeat_types)
+  missing_indexes = all_indexes.difference(existing_indexes)
+
+  print(f'len(missing_indexes): {len(missing_indexes)}')
+
+  for missing_index in missing_indexes:
+    print(f'Adding {missing_index}')
+    repeat_types_series[missing_index] = 0.00
+
+  return repeat_types_series
 
 
 def get_average_non_b_dna_density(nbmst_output_folder):
