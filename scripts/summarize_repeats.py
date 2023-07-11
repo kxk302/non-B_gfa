@@ -179,21 +179,25 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   length_of_repeat_types = add_missing_indexes(length_of_repeat_types_tmp)
   length_of_repeat_types.sort_index(inplace=True)
 
-  # Add new columns
-  intersect_length_sum["number_of_repeat_types"] = number_of_repeat_types
-  intersect_length_sum["length_of_repeat_types"] = length_of_repeat_types
-
   #
-  # Add row with average non-B density per non-B type, per species
+  # Get the average non-B density per non-B type, per species
+  # Divide dataframe cells by their corresponding non-B DNA density
+  #   This allows us to detect enrichment, i.e., cases where density in a certain cell is higher than the non-B DNA density
+  # Add non-B density per non-B type as a new row
   #
   average_non_b_dna_density = get_average_non_b_dna_density(nbmst_output_folder)
   average_non_b_dna_density_list = average_non_b_dna_density.tolist()
-  # Add 2 more 0 values for the 2 columns added above
-  average_non_b_dna_density_list.extend([0.00, 0.00])
   print(f'average_non_b_dna_density_list: {average_non_b_dna_density_list}')
-  intersect_length_sum.loc["avg_non_b_dna_density"] = average_non_b_dna_density_list
 
-  intersect_length_sum.to_csv(output_file, sep="\t")
+  average_non_b_dna_density_series = pd.Series(average_non_b_dna_density_list, index=intersect_length_sum.columns)
+  intersect_length_sum_enrich = intersect_length_sum.div(average_non_b_dna_density_series)
+  intersect_length_sum_enrich.loc["avg_non_b_dna_density"] = average_non_b_dna_density_list
+
+  # Add new columns
+  intersect_length_sum_enrich["number_of_repeat_types"] = number_of_repeat_types
+  intersect_length_sum_enrich["length_of_repeat_types"] = length_of_repeat_types
+
+  intersect_length_sum_enrich.to_csv(output_file, sep="\t")
 
 def add_missing_indexes(repeat_types_series):
   existing_indexes = set(repeat_types_series.index.tolist())

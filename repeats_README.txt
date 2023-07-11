@@ -32,5 +32,6 @@
    intervals specified in the intersect files from step 6; For each species, this generates a table compsed of 63 rows (repeat
    types) and 7 columns (non-b DNA types). Divide the values in each row of this table (say, row 1 represents 'Satellite'
    repeat type) by the corresponding value in the list (say, element 1 of the list represents 'Satellite' repeat). This
-   normalizes the value to be between 0 and 1. The normalized table is saved to a .tsv file in ./repeats/summary_output
-   folder, as well as a heatmap generated off the normalized table.
+   normalizes the value to be between 0 and 1. Finally, we divided table cells by their corresponding non-B DNA density.
+   This allows us to detect enrichment, i.e. cases where density in a certain cell is higher than the non-B DNA density.
+   The normalized table is saved to a .tsv file in ./repeats/summary_output folder.
