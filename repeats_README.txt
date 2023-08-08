@@ -27,13 +27,13 @@
 
 6. Run ./scripts/intersect_repeat_files.sh (Calls 'intersect_repeat_file.sh' for each species). For each species,
    intersect_repeat_file.sh calls 'bedtools intersect' to find the overlaps between a repeat file and each of non-B
-   DNA annotations APR, DR, GQ, IR, MR, STR, and Z. We have 126 repeat files for each species, and since there are 7
-   non-B DNA types, intersect_repeat_files.sh creates 882 intersect files.
+   DNA annotations APR, DR, GQ, IR, MR, STR, and Z. We have 148 repeat files for each species, and since there are 7
+   non-B DNA types, intersect_repeat_files.sh creates 1036 intersect files.
 
 7. Run ./scripts/summarize_repeats.sh (Calls 'summarize_repeats.py' for each species). For each species, and for each repeat
    type, sum up the length of intervals specified in the merged repeat files from step 4; For each species, this generates a
-   list composed of 61 numbers. For each species, for each repeat type, and for each non-B DNA type, sum up the length of
-   intervals specified in the intersect files from step 6; For each species, this generates a table compsed of 63 rows (repeat
+   list composed of 74 numbers. For each species, for each repeat type, and for each non-B DNA type, sum up the length of
+   intervals specified in the intersect files from step 6; For each species, this generates a table compsed of 74 rows (repeat
    types) and 7 columns (non-b DNA types). Divide the values in each row of this table (say, row 1 represents 'Satellite'
    repeat type) by the corresponding value in the list (say, element 1 of the list represents 'Satellite' repeat). This
    normalizes the value to be between 0 and 1. Finally, we divided table cells by their corresponding non-B DNA density.

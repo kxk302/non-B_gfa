@@ -20,7 +20,7 @@ do
   do
     for nonB in "APR" "DR" "GQ" "IR" "MR" "STR" "Z"
     do
-      bedtools intersect -a $repeat -b ${NonBDNAFolder}/${chr}_${nonB}.bed > ${repeat/_merged.bed/_intersect_$nonB.bed}
+      bedtools intersect -a $repeat -b ${NonBDNAFolder}/${chr}_${nonB}_merged.bed > ${repeat/_merged.bed/_intersect_$nonB.bed}
     done
   done
 done
