@@ -5,9 +5,13 @@
 2. There are 8 files for Bonobo, Gorilla, Bornean Orangutan, Sumataran Orangutan, Chimpanzee, Siamang, CHM13 and HG002.
 
 3. Run ./scripts/create_repeat_files.sh (Calls 'create_repeat_files.py' for each species) to create repeat files (for
-   63 repeat type listed in create_repeat_files.py), for chrX and chrY, for each species listed in step 2. We used CHM13
+   61 repeat type listed in create_repeat_files.py), for chrX and chrY, for each species listed in step 2. We used CHM13
    for Human. This scripts uses the RepeatMasker files as input, and generates repeat files in ./repeats/<species> folder.
-   For each of the species, 126 repeat files are generated (63 repeat types and 2 chromosomes).
+   For 5 "Satellite*" and "Unspecified" repeat types, the script creates a file for each sub-type. The list of sub-types
+   for each 5 "Satellite*" and "Unspecified" repeat types can be found in REPEAT_SUBLABELS variable in
+   ./scripts/create_repeat_files.py. There are a total of 19 sub-types for "Satellite*" and "Unspecified" repeat types, hence,
+   38 files for chromosomes X and Y are created. For the remaining 55 repeat types, 110 files are created for chromosomes X and Y
+   Hence, the number of files created for each species is  110 + 38 = 148.
 
 4. Run ./scripts/merge_repeat_files.sh (Calls 'bedtools merge' for each species' repeat files) to combine overlapping
    intervals, to avoid double counting them. The output file will have '_merged' added to their name, right before the

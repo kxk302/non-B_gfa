@@ -133,7 +133,6 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
         try:
           df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
         except pd.errors.EmptyDataError:
-          print("The CSV file is empty")
           print("The TSV file is empty. No need to update intersect length dataframe")
         else:
           df["length"] = df["stop"] - df["start"] + 1
