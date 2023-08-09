@@ -3,77 +3,17 @@ import os
 from os import path 
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 
 from create_repeat_files import CHROMOSOMES as chromosomes
 from create_repeat_files import REPEATS_FILE_COLUMNS, REPEATS_COLUMN_NAMES
+from create_repeat_files import REPEAT_LABELS as repeat_types
+from create_repeat_files import REPEAT_SUBLABELS as repeat_subtypes
+from create_repeat_files import REPEATS_WITH_SUBLABELS as repeats_with_subtypes
+from create_repeat_files import get_repeat_indexes
 
-repeat_types = [
-  "DNA",
-  "DNA/Crypton",
-  "DNA/Crypton-A",
-  "DNA/Kolobok",
-  "DNA/MULE-MuDR",
-  "DNA/Merlin",
-  "DNA/PIF-Harbinger",
-  "DNA/PiggyBac",
-  "DNA/TcMar",
-  "DNA/TcMar-Mariner",
-  "DNA/TcMar-Pogo",
-  "DNA/TcMar-Tc1",
-  "DNA/TcMar-Tc2",
-  "DNA/TcMar-Tigger",
-  "DNA/hAT",
-  "DNA/hAT-Ac",
-  "DNA/hAT-Blackjack",
-  "DNA/hAT-Charlie",
-  "DNA/hAT-Tag1",
-  "DNA/hAT-Tip100",
-  "DNA/hAT-Tip100?",
-  "DNA/hAT-hAT19",
-  "DNA/hAT?",
-  "DNA?/hAT-Tip100?",
-  "LINE/CR1",
-  "LINE/Dong-R4",
-  "LINE/I-Jockey",
-  "LINE/L1",
-  "LINE/L1-Tx1",
-  "LINE/L2",
-  "LINE/Penelope",
-  "LINE/RTE-BovB",
-  "LINE/RTE-X",
-  "LTR",
-  "LTR/ERV1",
-  "LTR/ERVK",
-  "LTR/ERVL",
-  "LTR/ERVL-MaLR",
-  "LTR/Gypsy",
-  "Low_complexity",
-  "RC/Helitron",
-  "Retroposon/SVA",
-  "SINE/5S-Deu-L2",
-  "SINE/Alu",
-  "SINE/MIR",
-  "SINE/tRNA",
-  "SINE/tRNA-Deu",
-  "SINE/tRNA-RTE",
-  "Satellite",
-  "Satellite/Y-chromosome",
-  "Satellite/acro",
-  "Satellite/centr",
-  "Satellite/subtelo",
-  "Simple_repeat",
-  "Unknown",
-  "Unspecified",
-  "Unspecified_SAT",
-  "Unspecified_StSat_pCHT",
-  "rRNA",
-  "scRNA",
-  "snRNA",
-  "srpRNA",
-  "tRNA",
-]
 non_b_dna_types = ["APR", "DR", "GQ", "IR", "MR", "STR", "Z"]
 non_b_dna_dict = {
     "APR": "A-Phased Repeats",
@@ -96,7 +36,8 @@ species_to_folder_dict = {
 }
 
 def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file):
-  zero_list = [0.00] * len(repeat_types)
+  repeat_types_len = get_number_of_repeats(repeat_types, repeat_subtypes)
+  zero_list = [0.00] * repeat_types_len
   data = {
     "APR": zero_list,
     "DR": zero_list,
@@ -107,75 +48,134 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
     "Z": zero_list,
   }
 
-  repeats_length_sum = pd.Series(data=zero_list, index=repeat_types)
-  intersect_length_sum = pd.DataFrame(data=data, index=repeat_types)
+  repeats_length_sum = pd.Series(data=zero_list, index=get_repeat_indexes())
+  intersect_length_sum = pd.DataFrame(data=data, index=get_repeat_indexes())
 
   # Populate repeat length Series. Add chrX and chrY values to the same cell.
-  # We'd end up with len(repeat_types) values
+  # We'd end up with repeat_types_len values
   for chromosome in chromosomes:
-    for repeat_type in repeat_types:
-      file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_merged.bed")
+    for index, repeat_type in enumerate(repeat_types):
+      if repeat_subtypes[index] == "":
+        file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_merged.bed")
 
-      try:
-        df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
-      except pd.errors.EmptyDataError:
-        print("The TSV file is empty. No need to update repeats length series")
-      else:
-        df["length"] = df["stop"] - df["start"] + 1
-        repeats_length_sum[repeat_type] += df["length"].sum()
-
-  # Populate intersect length DataFrame. Add chrX and chrY values to the same cell.
-  # We'd end up with len(repeat_types) X len(non_b_dna_types) values
-  for chromosome in chromosomes:
-    for repeat_type in repeat_types:
-      for non_b_dna_type in non_b_dna_types:
-        file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_intersect_" + non_b_dna_type + ".bed")
         try:
           df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
         except pd.errors.EmptyDataError:
-          print("The TSV file is empty. No need to update intersect length dataframe")
+          print("The TSV file is empty. No need to update repeats length series")
         else:
           df["length"] = df["stop"] - df["start"] + 1
-          intersect_length_sum.loc[repeat_type, non_b_dna_type] += df["length"].sum()
+          repeats_length_sum.loc[repeat_type] += df["length"].sum()
+      else:
+        for repeat_subtype in repeat_subtypes[index]:
+          file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_" + repeat_subtype.replace("/", "_") + "_merged.bed")
+
+          try:
+            df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
+          except pd.errors.EmptyDataError:
+            print("The TSV file is empty. No need to update repeats length series")
+          else:
+            df["length"] = df["stop"] - df["start"] + 1
+            repeats_length_sum.loc[repeat_type + "_" + repeat_subtype] += df["length"].sum()
+
+
+  # Populate intersect length DataFrame. Add chrX and chrY values to the same cell.
+  # We'd end up with repeat_types_len X len(non_b_dna_types) values
+  for chromosome in chromosomes:
+    for index, repeat_type in enumerate(repeat_types):
+      for non_b_dna_type in non_b_dna_types:
+        if repeat_subtypes[index] == "":
+          file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_intersect_" + non_b_dna_type + ".bed")
+          try:
+            df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
+          except pd.errors.EmptyDataError:
+            print("The TSV file is empty. No need to update intersect length dataframe")
+          else:
+            df["length"] = df["stop"] - df["start"] + 1
+            intersect_length_sum.loc[repeat_type, non_b_dna_type] += df["length"].sum()
+        else:
+          for repeat_subtype in repeat_subtypes[index]:
+            file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_" + repeat_subtype.replace("/", "_") +  "_intersect_" + non_b_dna_type + ".bed")
+            try:
+              df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
+            except pd.errors.EmptyDataError:
+              print("The TSV file is empty. No need to update intersect length dataframe")
+            else:
+              df["length"] = df["stop"] - df["start"] + 1
+              intersect_length_sum.loc[repeat_type + "_" + repeat_subtype, non_b_dna_type] += df["length"].sum()
 
 
   # Divide intersect length table rows by corresponding repeat length table values
   # This results in cell values beingbetween 0 and 1
-  for repeat_type in repeat_types:
-    if repeats_length_sum[repeat_type] != 0.00:
-      intersect_length_sum.loc[repeat_type] /= repeats_length_sum[repeat_type]
+  for index, repeat_type in enumerate(repeat_types):
+    if repeat_subtypes[index] == "":
+      if repeats_length_sum.loc[repeat_type] != 0.00:
+        intersect_length_sum.loc[repeat_type] /= repeats_length_sum.loc[repeat_type]
+    else:
+      for repeat_subtype in repeat_subtypes[index]:
+        if repeats_length_sum.loc[repeat_type + "_" + repeat_subtype] != 0.00:
+          intersect_length_sum.loc[repeat_type + "_" + repeat_subtype] /= repeats_length_sum.loc[repeat_type + "_" + repeat_subtype]
+
   #
   # Add column with the number of repeat elements in each category, per species
   #
   repeats_file = path.join(repeats_folder, "input", species_to_folder_dict[species] + "_FinalAnnotations_June2023_v2.sort.out")
   repeats_df = pd.read_csv(repeats_file, sep="\t", usecols=REPEATS_FILE_COLUMNS, names=REPEATS_COLUMN_NAMES)
-  number_of_repeat_types_tmp = repeats_df['label'].value_counts().sort_index()
+  repeats_df_no_subtype = repeats_df[~repeats_df.label.isin(repeats_with_subtypes)]
+  number_of_repeat_types = repeats_df_no_subtype['label'].value_counts().sort_index()
+
+  for repeat_with_subtype in repeats_with_subtypes:
+    # We handle "Unspecified" separately below as we care about
+    # sub_labels that startWith something (not equal to something)
+    if repeat_with_subtype == "Unspecified":
+      continue
+    repeats_df_with_subtype = repeats_df[(repeats_df.label == repeat_with_subtype) & (repeats_df.sub_label.isin(repeat_subtypes[repeat_types.index(repeat_with_subtype)]))]
+    label_plus_sublabel_series = repeats_df_with_subtype.loc[:, "label"].astype(str) + "_" + repeats_df_with_subtype.loc[:, "sub_label"].astype(str)
+    number_of_repeat_subtypes_tmp = label_plus_sublabel_series.value_counts().sort_index()
+    number_of_repeat_types = pd.concat([number_of_repeat_types, number_of_repeat_subtypes_tmp])
 
   # Add rows for Unspecified_SAT and Unspecified_StSat_pCHT to the number of repeat elements column
   repeats_df_sat = repeats_df[ (repeats_df['label'] == "Unspecified") & (repeats_df['sub_label'].str.startswith("SAT")) ]
   repeats_df_stsat = repeats_df[ (repeats_df['label'] == "Unspecified") & (repeats_df['sub_label'].str.startswith("StSat_pCHT")) ]
-  number_of_repeat_types_tmp["Unspecified_SAT"] = repeats_df_sat.shape[0]
-  number_of_repeat_types_tmp["Unspecified_StSat_pCHT"] = repeats_df_stsat.shape[0]
-  number_of_repeat_types_tmp.sort_index()
+  number_of_repeat_types["Unspecified_SAT"] = repeats_df_sat.shape[0]
+  number_of_repeat_types["Unspecified_StSat_pCHT"] = repeats_df_stsat.shape[0]
+  number_of_repeat_types.sort_index(inplace=True)
 
-  number_of_repeat_types = add_missing_indexes(number_of_repeat_types_tmp)
+  number_of_repeat_types = add_missing_indexes(number_of_repeat_types)
   number_of_repeat_types.sort_index(inplace=True)
 
   #
   # Add column with the length of the repeat elements in each category, per species
   #
-  repeats_df["length"] = repeats_df["stop"] - repeats_df["start"] + 1
+  repeats_df_no_subtype_copy = repeats_df_no_subtype.copy()
+  repeats_df_no_subtype_copy["length"] = repeats_df_no_subtype["stop"].astype(int) - repeats_df_no_subtype["start"].astype(int) + 1
   # Convert Dataframe to Series before passing it to add_missing_indexes
-  length_of_repeat_types_tmp = repeats_df[["label", "length"]].groupby("label").sum().T.squeeze().sort_index()
+  length_of_repeat_types = repeats_df_no_subtype_copy[["label", "length"]].groupby("label").sum().T.squeeze().sort_index()
+
+  for repeat_with_subtype in repeats_with_subtypes:
+    # We handle "Unspecified" separately below as we care about
+    # sub_labels that startWith something (not equal to something)
+    if repeat_with_subtype == "Unspecified":
+      continue
+    repeats_df_with_subtype = repeats_df[(repeats_df.label == repeat_with_subtype) & (repeats_df.sub_label.isin(repeat_subtypes[repeat_types.index(repeat_with_subtype)]))]
+    repeats_df_with_subtype_copy = repeats_df_with_subtype.copy()
+    repeats_df_with_subtype_copy["length"] = repeats_df_with_subtype.loc[:, "stop"] - repeats_df_with_subtype.loc[:, "start"] + 1
+    repeats_df_with_subtype_copy["label_plus_sublabel"] = repeats_df_with_subtype.loc[:, "label"].astype(str) + "_" + repeats_df_with_subtype.loc[:, "sub_label"].astype(str)
+
+    if isinstance(repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().T.squeeze(), (int, np.integer)):
+      length_of_repeat_subtypes_tmp = pd.Series(repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().T.squeeze(), index=repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().index.tolist())
+    else:
+      length_of_repeat_subtypes_tmp = repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().T.squeeze().sort_index()
+
+    length_of_repeat_types = pd.concat([length_of_repeat_types, length_of_repeat_subtypes_tmp])
 
   # Add rows for Unspecified_SAT and Unspecified_StSat_pCHT to the length of the repeat elements column
   repeats_df_sat_length = repeats_df_sat["stop"] - repeats_df_sat["start"] + 1
   repeats_df_stsat_length = repeats_df_stsat["stop"] - repeats_df_stsat["start"] + 1
-  length_of_repeat_types_tmp["Unspecified_SAT"] = repeats_df_sat_length.sum()
-  length_of_repeat_types_tmp["Unspecified_StSat_pCHT"] = repeats_df_stsat_length.sum()
-  length_of_repeat_types_tmp.sort_index()
+  length_of_repeat_types.loc["Unspecified_SAT"] = repeats_df_sat_length.sum()
+  length_of_repeat_types.loc["Unspecified_StSat_pCHT"] = repeats_df_stsat_length.sum()
+  length_of_repeat_types.sort_index()
 
-  length_of_repeat_types = add_missing_indexes(length_of_repeat_types_tmp)
+  length_of_repeat_types = add_missing_indexes(length_of_repeat_types)
   length_of_repeat_types.sort_index(inplace=True)
 
   #
@@ -193,14 +193,15 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   intersect_length_sum_enrich.loc["avg_non_b_dna_density"] = average_non_b_dna_density_list
 
   # Add new columns
-  intersect_length_sum_enrich["number_of_repeat_types"] = number_of_repeat_types
-  intersect_length_sum_enrich["length_of_repeat_types"] = length_of_repeat_types
+  intersect_length_sum_enrich.loc["number_of_repeat_types"] = number_of_repeat_types
+  intersect_length_sum_enrich.loc["length_of_repeat_types"] = length_of_repeat_types
 
-  intersect_length_sum_enrich.to_csv(output_file, sep="\t")
+  intersect_length_sum_enrich.sort_index(inplace=True)
+  intersect_length_sum_enrich.to_csv(output_file, sep="\t", float_format=".4f")
 
 def add_missing_indexes(repeat_types_series):
   existing_indexes = set(repeat_types_series.index.tolist())
-  all_indexes = set(repeat_types)
+  all_indexes = get_repeat_indexes()
   missing_indexes = all_indexes.difference(existing_indexes)
 
   print(f'len(missing_indexes): {len(missing_indexes)}')
@@ -240,6 +241,18 @@ def get_average_non_b_dna_density(nbmst_output_folder):
   print(f'average_non_b_dna_density: {average_non_b_dna_density}')
   print(f'average_non_b_dna_density.div(total_length): {average_non_b_dna_density.div(total_length)}')
   return average_non_b_dna_density.div(total_length)
+
+
+def get_number_of_repeats(repeat_types, repeat_subtypes):
+  number_of_repeats = 0
+
+  for index, repeat_type in enumerate(repeat_types):
+    if repeat_subtypes[index] == "":
+      number_of_repeats += 1
+    else:
+      number_of_repeats += len(repeat_subtypes[index])
+
+  return number_of_repeats
 
 
 if __name__ == "__main__":

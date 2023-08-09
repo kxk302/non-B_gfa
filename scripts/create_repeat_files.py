@@ -69,6 +69,14 @@ REPEAT_LABELS = [
   "tRNA", 
 ]
 REPEAT_SUBLABELS = [""]*len(REPEAT_LABELS)
+REPEATS_WITH_SUBLABELS = [
+  "Satellite",
+  "Satellite/Y-chromosome",
+  "Satellite/acro",
+  "Satellite/centr",
+  "Satellite/subtelo",
+  "Unspecified"
+]
 
 # Set sub-labels for "Unspecified". Per email from Bob H., there is also an “Unspecified” class
 # that contains some subclasses that are satellites — they begin with ”SAT” and “StSat_pCHT”
@@ -103,6 +111,24 @@ def create_repeat_files(species, repeats_file, output_folder):
                                  (repeats_df.chromosome == chromosome) ]
           output_file_path = path.join(output_folder, species, chromosome + "_" + label.replace("/", "_") + "_" + sub_label.replace("/", "_") + ".bed")
           df_label.to_csv(output_file_path, columns=["chromosome", "start", "stop"], header=False, index=False, sep="\t")
+
+
+def get_repeat_indexes():
+  repeats_indexes = set()
+
+  all_repeats_indexes = set(REPEAT_LABELS)
+  repeats_with_sublabels_indexes = set(REPEATS_WITH_SUBLABELS)
+
+  # Add all indexes for repeat types with no sublabels
+  repeats_indexes.update(all_repeats_indexes.difference(repeats_with_sublabels_indexes))
+
+  for repeat_with_sublabel in REPEATS_WITH_SUBLABELS:
+    # Get sublabels
+    sub_labels = REPEAT_SUBLABELS[REPEAT_LABELS.index(repeat_with_sublabel)]
+    for sub_label in sub_labels:
+      repeats_indexes.add(repeat_with_sublabel + "_" + sub_label)
+
+  return repeats_indexes
 
 
 if __name__ == "__main__":
