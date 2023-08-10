@@ -190,14 +190,15 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
 
   average_non_b_dna_density_series = pd.Series(average_non_b_dna_density_list, index=intersect_length_sum.columns)
   intersect_length_sum_enrich = intersect_length_sum.div(average_non_b_dna_density_series)
+
+  intersect_length_sum_enrich.sort_index(inplace=True)
   intersect_length_sum_enrich.loc["avg_non_b_dna_density"] = average_non_b_dna_density_list
 
   # Add new columns
-  intersect_length_sum_enrich.loc["number_of_repeat_types"] = number_of_repeat_types
-  intersect_length_sum_enrich.loc["length_of_repeat_types"] = length_of_repeat_types
+  intersect_length_sum_enrich["number_of_repeat_types"] = number_of_repeat_types
+  intersect_length_sum_enrich["length_of_repeat_types"] = length_of_repeat_types
 
-  intersect_length_sum_enrich.sort_index(inplace=True)
-  intersect_length_sum_enrich.to_csv(output_file, sep="\t", float_format=".4f")
+  intersect_length_sum_enrich.to_csv(output_file, sep="\t", float_format="%.4f")
 
 def add_missing_indexes(repeat_types_series):
   existing_indexes = set(repeat_types_series.index.tolist())
