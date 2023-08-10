@@ -161,11 +161,7 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
     repeats_df_with_subtype_copy["length"] = repeats_df_with_subtype.loc[:, "stop"] - repeats_df_with_subtype.loc[:, "start"] + 1
     repeats_df_with_subtype_copy["label_plus_sublabel"] = repeats_df_with_subtype.loc[:, "label"].astype(str) + "_" + repeats_df_with_subtype.loc[:, "sub_label"].astype(str)
 
-    if isinstance(repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().T.squeeze(), (int, np.integer)):
-      length_of_repeat_subtypes_tmp = pd.Series(repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().T.squeeze(), index=repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().index.tolist())
-    else:
-      length_of_repeat_subtypes_tmp = repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().T.squeeze().sort_index()
-
+    length_of_repeat_subtypes_tmp = repeats_df_with_subtype_copy[["label_plus_sublabel", "length"]].groupby("label_plus_sublabel").sum().T.squeeze(axis=0).sort_index()
     length_of_repeat_types = pd.concat([length_of_repeat_types, length_of_repeat_subtypes_tmp])
 
   # Add rows for Unspecified_SAT and Unspecified_StSat_pCHT to the length of the repeat elements column
