@@ -83,7 +83,22 @@ REPEATS_WITH_SUBLABELS = [
 REPEAT_SUBLABELS[REPEAT_LABELS.index("Unspecified")]=["SAT", "StSat_pCHT"]
 
 # Set sub-labels for "Satellite/*"
-REPEAT_SUBLABELS[REPEAT_LABELS.index("Satellite")]=["BSR/Beta", "HSATII", "HSATI", "(CATTC)n", "(GAATG)n", "LSAU"]
+REPEAT_SUBLABELS[REPEAT_LABELS.index("Satellite")]=[
+  "BSR/Beta",
+  "HSATII",
+  "HSATI",
+  "(CATTC)n",
+  "(GAATG)n",
+  "LSAU",
+  "SAR",
+  "SAT-VAR_rnd-1_family-9",
+  "CER",
+  "SATR1",
+  "D20S16",
+  "SATR2",
+  "HSAT5",
+  "PTPCHT7"
+]
 REPEAT_SUBLABELS[REPEAT_LABELS.index("Satellite/Y-chromosome")]=["ALRY-MAJOR_PT", "ALRY-MINOR_PT"]
 REPEAT_SUBLABELS[REPEAT_LABELS.index("Satellite/acro")]=["6kbHsap", "ACRO1"]
 REPEAT_SUBLABELS[REPEAT_LABELS.index("Satellite/centr")]=["SST1", "ALR/Alpha", "HSAT4", "GSATX", "GSATII", "GSAT"]

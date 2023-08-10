@@ -9,9 +9,9 @@
    for Human. This scripts uses the RepeatMasker files as input, and generates repeat files in ./repeats/<species> folder.
    For 5 "Satellite*" and "Unspecified" repeat types, the script creates a file for each sub-type. The list of sub-types
    for each 5 "Satellite*" and "Unspecified" repeat types can be found in REPEAT_SUBLABELS variable in
-   ./scripts/create_repeat_files.py. There are a total of 19 sub-types for "Satellite*" and "Unspecified" repeat types, hence,
-   38 files for chromosomes X and Y are created. For the remaining 55 repeat types, 110 files are created for chromosomes X and Y
-   Hence, the number of files created for each species is  110 + 38 = 148.
+   ./scripts/create_repeat_files.py. There are a total of 27 sub-types for "Satellite*" and "Unspecified" repeat types, hence,
+   54 files for chromosomes X and Y are created. For the remaining 55 repeat types, 110 files are created for chromosomes X and Y
+   Hence, the number of files created for each species is  110 + 54 = 164.
 
 4. Run ./scripts/merge_repeat_files.sh (Calls 'bedtools merge' for each species' repeat files) to combine overlapping
    intervals, to avoid double counting them. The output file will have '_merged' added to their name, right before the
@@ -27,13 +27,13 @@
 
 6. Run ./scripts/intersect_repeat_files.sh (Calls 'intersect_repeat_file.sh' for each species). For each species,
    intersect_repeat_file.sh calls 'bedtools intersect' to find the overlaps between a repeat file and each of non-B
-   DNA annotations APR, DR, GQ, IR, MR, STR, and Z. We have 148 repeat files for each species, and since there are 7
-   non-B DNA types, intersect_repeat_files.sh creates 1036 intersect files.
+   DNA annotations APR, DR, GQ, IR, MR, STR, and Z. We have 164 repeat files for each species, and since there are 7
+   non-B DNA types, intersect_repeat_files.sh creates 1148 intersect files.
 
 7. Run ./scripts/summarize_repeats.sh (Calls 'summarize_repeats.py' for each species). For each species, and for each repeat
    type, sum up the length of intervals specified in the merged repeat files from step 4; For each species, this generates a
-   list composed of 74 numbers. For each species, for each repeat type, and for each non-B DNA type, sum up the length of
-   intervals specified in the intersect files from step 6; For each species, this generates a table compsed of 74 rows (repeat
+   list composed of 82 numbers. For each species, for each repeat type, and for each non-B DNA type, sum up the length of
+   intervals specified in the intersect files from step 6; For each species, this generates a table compsed of 82 rows (repeat
    types) and 7 columns (non-b DNA types). Divide the values in each row of this table (say, row 1 represents 'Satellite'
    repeat type) by the corresponding value in the list (say, element 1 of the list represents 'Satellite' repeat). This
    normalizes the value to be between 0 and 1. Finally, we divided table cells by their corresponding non-B DNA density.
