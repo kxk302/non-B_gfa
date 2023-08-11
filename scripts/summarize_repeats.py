@@ -196,6 +196,13 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
 
   intersect_length_sum_enrich.to_csv(output_file, sep="\t", float_format="%.4f")
 
+  # Generate heatmap and save to file
+  heatmap_file_name = path.splitext(output_file)[0] + ".png"
+  # Figure size in inches
+  fig, ax = plt.subplots(figsize=(7.5, 20))
+  sns.heatmap(intersect_length_sum_enrich.iloc[:-1,:-2], cbar=1, linewidths=2, square=True, cmap='Blues', annot=False)
+  plt.savefig(heatmap_file_name)
+
 def add_missing_indexes(repeat_types_series):
   existing_indexes = set(repeat_types_series.index.tolist())
   all_indexes = get_repeat_indexes()
