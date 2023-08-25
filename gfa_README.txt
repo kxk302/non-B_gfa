@@ -48,5 +48,5 @@ output/
 ├── Pongo_pygmaeus
 └── Symphalangus_syndactylus
 
-4. Run ./scripts/run_nBMST.sh. This script calls ./scripts/run_nBMST.sh for each species and for chrX and chrY. The output files 
+4. Run ./scripts/run_nBMSTs.sh. This script calls ./scripts/run_nBMST.sh for each species and for chrX and chrY. The output files 
    are moved from <MyWorkspace>/non-B_gfa directory to the output folder.
