@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -ne 3 ]; then 
+if [ $# -ne 3 ]; then
     echo "Incorrect number of parameters"
     echo "Specify the input fasta file, the output file name prefix, and the output diectory"
     exit

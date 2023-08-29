@@ -28,7 +28,7 @@ input/
 
 2. Create the input file for Simple Logistic Regression (SLR), for all species (except for Pongo_pygmaeus and
    Symphalangus_syndactylus), and for all non-B DNA types, by running the following script.
- 
+
    ./scripts/logistic_regression_input.sh
 
    This script calls ./scripts/logistic_regression_input.py for each species + non-B DNA combination (including 'all').

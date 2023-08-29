@@ -1,7 +1,7 @@
 1. The RepeatMasker files we got from Gabby Hartley (from Rachel O'Neill's group at UConn) are in this directory:
 
    /nfs/brubeck.bx.psu.edu/scratch6/makova_lab/downloads/primate_T2T/assemblies/annotations/repeatannotations_final/
-  
+
 2. There are 8 files for Bonobo, Gorilla, Bornean Orangutan, Sumataran Orangutan, Chimpanzee, Siamang, CHM13 and HG002.
 
 3. Run ./scripts/create_repeat_files.sh (Calls 'create_repeat_files.py' for each species) to create repeat files (for

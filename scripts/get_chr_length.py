@@ -13,7 +13,7 @@ def get_chr_length(chromosome_fasta_file, chromosome_name, output_file):
 
 if __name__ == "__main__":
   argParser = argparse.ArgumentParser("This script returns the length of a chromosome given a fatsa file")
-  
+
   argParser.add_argument("-i", "--chromosome_fasta_file", type=str, required=True)
   argParser.add_argument("-c", "--chromosome_name", type=str, required=True)
   argParser.add_argument("-o", "--output_file", type=str, required=True)

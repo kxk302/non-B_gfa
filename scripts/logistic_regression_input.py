@@ -38,7 +38,7 @@ def merge_input_files(pre_existing_per_window_density, non_b_dna_density_file,
   df['novel_label'] = df['novel'] > threshold
   df['novel_label'] = df['novel_label'].astype(int)
 
-  df_non_b_dna = pd.read_csv(non_b_dna_density_file, sep='\t')  
+  df_non_b_dna = pd.read_csv(non_b_dna_density_file, sep='\t')
   # This column is not needed. Drop it.
   df_non_b_dna.drop('chr', axis=1, inplace=True)
   # Rename column to avod clashing when joining with other dataframe

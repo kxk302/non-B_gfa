@@ -22,7 +22,7 @@ def concat_nBMST_output_files(input_dir, output_file, chromosome_name, non_b_dna
     df.chromEnd = df.chromEnd.astype(int)
     print(df.head(1))
     df_all = pd.concat([df_all, df], axis=0)
-  
+
   print(f'df_all.shape[0]: {df_all.shape[0]}')
   print(df_all.head(1))
   df_all.sort_values(by=['chromStart', 'chromEnd'], inplace=True)

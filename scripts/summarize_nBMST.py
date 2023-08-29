@@ -1,25 +1,25 @@
 import argparse
-from os import path 
+from os import path
 
 import pandas as pd
 import Bio.SeqIO as IO
-  
-species_list = ["Gorilla_gorilla", "Homo_sapiens", "Pan_paniscus", "Pan_troglodytes", 
+
+species_list = ["Gorilla_gorilla", "Homo_sapiens", "Pan_paniscus", "Pan_troglodytes",
                 "Pongo_abelii", "Pongo_pygmaeus", "Symphalangus_syndactylus"]
- 
-species_list_for_index = ["Gorilla", "Human", "Bonobo", "Chimpanzee", 
+
+species_list_for_index = ["Gorilla", "Human", "Bonobo", "Chimpanzee",
                           "S. Orangutan", "B. Orangutan", "Siamang"]
 species_dict = {
   "Gorilla_gorilla": "Gorilla",
   "Homo_sapiens" : "Human",
   "Pan_paniscus": "Bonobo",
   "Pan_troglodytes": "Chimpanzee",
-  "Pongo_abelii": "S. Orangutan", 
-  "Pongo_pygmaeus": "B. Orangutan", 
+  "Pongo_abelii": "S. Orangutan",
+  "Pongo_pygmaeus": "B. Orangutan",
   "Symphalangus_syndactylus" : "Siamang",
 }
 
-non_b_dna_types = ["A-Phased Repeats", "Short Tandem Repeats", "Direct Repeats", 
+non_b_dna_types = ["A-Phased Repeats", "Short Tandem Repeats", "Direct Repeats",
                    "Mirror Repeats", "Inverted Repeats", "G-Quadruplex", "Z DNA"]
 
 chromosomes = ["chrX", "chrY"]
@@ -37,7 +37,7 @@ non_b_dna_dict = {
     "Z DNA": "Z",
   }
 
-def summarize_single_nBMST(nBMST_output_file_path, chromosome_name, 
+def summarize_single_nBMST(nBMST_output_file_path, chromosome_name,
                            chromosome_fatsa_file_path, species):
 
   df = pd.read_csv(nBMST_output_file_path, sep="\t", names=["chr", "start", "stop"])
@@ -53,7 +53,7 @@ def summarize_single_nBMST(nBMST_output_file_path, chromosome_name,
   length_sum_normalized = length_sum / chromosome_sequence_length
   print(f'length_sum_normalized: {length_sum_normalized}')
 
-  return length_sum, length_sum_normalized 
+  return length_sum, length_sum_normalized
 
 
 def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir, output_file_dir):
@@ -83,7 +83,7 @@ def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir, output
         chromosome_fatsa_file_path = path.join(chromosome_fasta_file_dir, species, "seqs_srcdir", chromosome + ".fa")
         print(f'chromosome_fatsa_file_path: {chromosome_fatsa_file_path}')
 
-        length_sum, length_sum_normalized = summarize_single_nBMST(nBMST_output_file_path, chromosome, 
+        length_sum, length_sum_normalized = summarize_single_nBMST(nBMST_output_file_path, chromosome,
                                                                    chromosome_fatsa_file_path, species)
         if chromosome == "chrX":
           chrX_length_sum.loc[species_dict[species], non_b_dna_type] = length_sum
@@ -91,7 +91,7 @@ def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir, output
         else:
           chrY_length_sum.loc[species_dict[species], non_b_dna_type] = length_sum
           chrY_length_sum_normalized.loc[species_dict[species], non_b_dna_type] = length_sum_normalized
-  
+
   chrX_length_sum.reset_index(inplace=True)
   chrX_length_sum = chrX_length_sum.rename(columns = {'index': 'Species'})
   chrX_length_sum.to_csv(output_file_dir + "/chrX.csv", float_format="%d", sep="&", index=False)
@@ -111,10 +111,10 @@ def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir, output
 
 if __name__ == "__main__":
   argParser = argparse.ArgumentParser("This script summarizes nBMST results")
-  
+
   argParser.add_argument("-n", "--nBMST_output_file_dir", type=str, required=True)
   argParser.add_argument("-c", "--chromosome_fasta_file_dir", type=str, required=True)
   argParser.add_argument("-o", "--output_file_dir", type=str, required=True)
   args = argParser.parse_args()
-  
+
   summarize_all_nBMST(args.nBMST_output_file_dir, args.chromosome_fasta_file_dir, args.output_file_dir)

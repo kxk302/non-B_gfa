@@ -66,7 +66,7 @@ REPEAT_LABELS = [
   "scRNA",
   "snRNA",
   "srpRNA",
-  "tRNA", 
+  "tRNA",
 ]
 REPEAT_SUBLABELS = [""]*len(REPEAT_LABELS)
 REPEATS_WITH_SUBLABELS = [
@@ -150,10 +150,10 @@ if __name__ == "__main__":
 
   argumentParser = argparse.ArgumentParser("Create merged (no overlap) repeat files for a species, for each repeat/satellite type")
 
-  argumentParser.add_argument("-s", "--species", type=str, required=True, 
+  argumentParser.add_argument("-s", "--species", type=str, required=True,
                               choices=["Bonobo", "Chimpanzee", "Human", "Gorilla", "B_Orangutan", "S_Orangutan", "Siamang"])
   argumentParser.add_argument("-f", "--repeats_file", type=str, required=True)
-  argumentParser.add_argument("-o", "--output_folder", type=str, required=True) 
+  argumentParser.add_argument("-o", "--output_folder", type=str, required=True)
 
   args = argumentParser.parse_args()
 

@@ -1,6 +1,6 @@
 import argparse
 import os
-from os import path 
+from os import path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -267,7 +267,7 @@ if __name__ == "__main__":
   argParser.add_argument("-f", "--repeats_folder", type=str, required=True)
   argParser.add_argument("-n", "--nbmst_output_folder", type=str, required=True)
   argParser.add_argument("-o", "--output_file", type=str, required=True)
-  
+
   args = argParser.parse_args()
-  
+
   summarize_repeats(args.species, args.repeats_folder, args.nbmst_output_folder, args.output_file)
