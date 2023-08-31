@@ -24,13 +24,14 @@ def run_nBMST(input_folder, output_folder):
       chromosome_type = file_extensions[-2].replace(".", "")
       print(f"chromosome_type: {chromosome_type}")
 
-      # ./gfa -seq $InputFastaFile -out $OutputFilePrefix
-      # find . -maxdepth 1 -iname "${OutputFilePrefix}_*" -exec mv {} ${OutputDir} \;
 
       OutputFilePrefix = species + "-" + chromosome_type + "-" + repeat_type
-      #result = subprocess.run(["./gfa", "-seq", file_path, "-out", OutputFilePrefix]) 
-      #print(f"result: {result}")
 
+      # We run Quadron for G4 annotation. Hence, skip G4 here
+      result = subprocess.run(["./gfa", "-seq", file_path, "-out", OutputFilePrefix, "-skipGQ"])
+      print(f"result: {result}")
+
+      # Move nBMST output files from current directory to output_folder
       result = subprocess.run(["find", ".", "-maxdepth", "1", "-iname", OutputFilePrefix + "_*",\
                                "-exec", "mv", "{}", output_folder, ";"])
       print(f"result: {result}")
