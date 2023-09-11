@@ -6,12 +6,12 @@ if [$# -ne 3]; then
   exit
 fi
 
-InputFolder=${1:-"./repeats/validation_input/split_fasta_files"}
-OutputFolder=${2:-"./repeats/validation_output/"}
-InputFileExtension=${3:-".fasta"}
+InputFolder=${1:-"/Users/kxk302/workspace/Quadron_Docker/input/hg19"}
+OutputFolder=${2:-"/Users/kxk302/workspace/Quadron_Docker/output/hg19/nBMST"}
+InputFileExtension=${3:-".fa"}
 
 echo "InputFolder: <$InputFolder>"
 echo "OutputFolder <$OutputFolder>"
 echo "InputFileExtension <$InputFileExtension>"
 
-python3 ./scripts/run_repeats_validation.py -i $InputFolder -o $OutputFolder -e $InputFileExtension
+python3 ./scripts/run_hg19.py -i $InputFolder -o $OutputFolder -e $InputFileExtension

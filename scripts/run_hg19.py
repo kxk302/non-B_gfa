@@ -4,7 +4,7 @@ import os
 import subprocess
 
 
-def run_nBMST(input_folder, output_folder, input_file_extension):
+def run_nBMST_hg19(input_folder, output_folder, input_file_extension):
   files = os.listdir(input_folder)
 
   for file in files:
@@ -16,23 +16,19 @@ def run_nBMST(input_folder, output_folder, input_file_extension):
       continue
 
     file_name = pathlib.Path(file_path).stem
-    file_extensions = pathlib.Path(file_path).suffixes
     file_extension = pathlib.Path(file_path).suffix
 
     if file_extension != input_file_extension:
       continue
 
-    species = file_name.split("_")[0]
+    species = "hg19"
     print(f"species: {species}")
 
-    repeat_type = file_extensions[-3].replace(".", "")
-    print(f"repeat_type: {repeat_type}")
-
-    chromosome_type = file_extensions[-2].replace(".", "")
+    chromosome_type = file_name
     print(f"chromosome_type: {chromosome_type}")
 
 
-    OutputFilePrefix = species + "-" + chromosome_type + "-" + repeat_type
+    OutputFilePrefix = species + "-" + chromosome_type
 
     # We run Quadron for G4 annotation. Hence, skip G4 here
     result = subprocess.run(["./gfa", "-seq", file_path, "-out", OutputFilePrefix, "-skipGQ"])
@@ -52,4 +48,4 @@ if __name__ == "__main__":
   argParse.add_argument("-e", "--input_file_extension", type=str, default="fasta")
 
   args = argParse.parse_args()
-  run_nBMST(args.input_folder, args.output_folder, args.input_file_extension)
+  run_nBMST_hg19(args.input_folder, args.output_folder, args.input_file_extension)
