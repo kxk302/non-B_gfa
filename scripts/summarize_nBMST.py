@@ -20,7 +20,7 @@ species_dict = {
 }
 
 non_b_dna_types = ["A-Phased Repeats", "Short Tandem Repeats", "Direct Repeats",
-                   "Mirror Repeats", "Inverted Repeats", "G-Quadruplex", "Z DNA"]
+                   "Mirror Repeats", "Inverted Repeats", "G-Quadruplex", "Z DNA", "All"]
 
 chromosomes = ["chrX", "chrY"]
 
@@ -35,6 +35,7 @@ non_b_dna_dict = {
     "Inverted Repeats": "IR",
     "G-Quadruplex": "GQ",
     "Z DNA": "Z",
+    "All": "all"
   }
 
 def summarize_single_nBMST(nBMST_output_file_path, chromosome_name,
@@ -94,19 +95,19 @@ def summarize_all_nBMST(nBMST_output_file_dir, chromosome_fasta_file_dir, output
 
   chrX_length_sum.reset_index(inplace=True)
   chrX_length_sum = chrX_length_sum.rename(columns = {'index': 'Species'})
-  chrX_length_sum.to_csv(output_file_dir + "/chrX.csv", float_format="%d", sep="&", index=False)
+  chrX_length_sum.to_csv(output_file_dir + "/chrX.csv", float_format="%d", sep=",", index=False)
 
   chrX_length_sum_normalized.reset_index(inplace=True)
   chrX_length_sum_normalized = chrX_length_sum_normalized.rename(columns = {'index': 'Species'})
-  chrX_length_sum_normalized.to_csv(output_file_dir + "/chrX_norm.csv", float_format="%.3f", sep="&", index=False)
+  chrX_length_sum_normalized.to_csv(output_file_dir + "/chrX_norm.csv", float_format="%.3f", sep=",", index=False)
 
   chrY_length_sum.reset_index(inplace=True)
   chrY_length_sum = chrY_length_sum.rename(columns = {'index': 'Species'})
-  chrY_length_sum.to_csv(output_file_dir + "/chrY.csv", float_format="%d", sep="&", index=False)
+  chrY_length_sum.to_csv(output_file_dir + "/chrY.csv", float_format="%d", sep=",", index=False)
 
   chrY_length_sum_normalized.reset_index(inplace=True)
   chrY_length_sum_normalized = chrY_length_sum_normalized.rename(columns = {'index': 'Species'})
-  chrY_length_sum_normalized.to_csv(output_file_dir + "/chrY_norm.csv", float_format="%.3f", sep="&", index=False)
+  chrY_length_sum_normalized.to_csv(output_file_dir + "/chrY_norm.csv", float_format="%.3f", sep=",", index=False)
 
 
 if __name__ == "__main__":

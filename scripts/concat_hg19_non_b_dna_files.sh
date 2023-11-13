@@ -14,5 +14,5 @@ hg19_chromosomes="chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 ch
 
 for chromosome in ${hg19_chromosomes}
 do
-  python3 ./scripts/concat_non_b_dna_files.py -i ${NbmstBedFolder} -o ${NbmstBedFolder}/${chromosome}_all.bed -c ${chromosome} -e ".bed";
+  python3 ./scripts/concat_non_b_dna_files.py -i ${NbmstBedFolder} -o ${NbmstBedFolder}/${chromosome}_all.bed -c ${chromosome} -e ".bed" -s Z APR;
 done

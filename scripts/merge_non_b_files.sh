@@ -12,7 +12,7 @@ echo "NbmstOutputFolder: <$NbmstOutputFolder>"
 cd $NbmstOutputFolder
 
 species_list="Gorilla_gorilla Pan_paniscus Pongo_abelii Symphalangus_syndactylus Homo_sapiens Pan_troglodytes Pongo_pygmaeus"
-nb_list="GQ MR STR APR IR DR Z"
+nb_list="GQ MR STR APR IR DR Z all"
 chr_list="chrX chrY"
 
 for folder in $species_list
