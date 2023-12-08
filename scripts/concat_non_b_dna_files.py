@@ -16,7 +16,7 @@ def concat_nBMST_output_files(input_dir, output_file, chromosome_name, non_b_dna
 
   for file_name in file_names:
     print(f"file_name: {file_name}")
-    if not non_b_dna_skip_list is None:
+    if non_b_dna_skip_list is not None:
       for non_b_dna_skip_type in non_b_dna_skip_list:
         if non_b_dna_skip_type in file_name:
           print(f"Skipping {file_name} as it is in non-b DNA skip list: {non_b_dna_skip_list}")

@@ -32,7 +32,7 @@
 
    You must pass the path to nBMST output and spacer length filter value to the script as parameters.
 
-6. For each species, and for chromosomes X and Y, aggregate the non-B DNA files into one .bed file, by running the following script:
+6. For each species, and each chromosome, aggregate the non-B DNA files into one .bed file, by running the following script:
 
    ./scripts/concat_non_b_dna_files.sh ./output/
 
