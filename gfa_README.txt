@@ -94,7 +94,16 @@ input/
 │       ├── chrX.fa
 │       └── chrY.fa
 
-5. Create the following output directory structure in <MyWorkspace>/non-B_gfa directory.
+5. Standardize the chromosome name in .fa files by running the following script in
+   every ./input/<species>/seq_srcdir:
+
+   for file in $(ls *.fa); do sed -i '' 's/_.*//' $file;done
+
+   This script, for example, changes '>chr1_pat_hsa1' to '>chr1' in gorilla_gorilla
+   chr1.fa. We need standardized chromosome names for './scripts/get_chr_length.sh'
+   to work properly.
+
+6. Create the following output directory structure in <MyWorkspace>/non-B_gfa directory.
 
 output/
 ├── Gorilla_gorilla
@@ -105,5 +114,5 @@ output/
 ├── Pongo_pygmaeus
 └── Symphalangus_syndactylus
 
-6. Run ./scripts/run_nBMSTs.sh. This script calls ./scripts/run_nBMST.sh for each species and each chromosome.
+7. Run ./scripts/run_nBMSTs.sh. This script calls ./scripts/run_nBMST.sh for each species and each chromosome.
    For each species, the output files are copied to the appropriate output folder.

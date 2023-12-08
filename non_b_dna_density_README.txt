@@ -2,12 +2,12 @@
 
    . ./venv/bin/activate
 
-2. For each species, calculate the chromosome X/Y sequence length by running the following script:
+2. For each species, calculate the chromosome sequence length by running the following script:
 
    ./scripts/get_chr_length.sh
 
-   This script calls ./scripts/get_chr_length.py for each species and chromosome X/Y, and creates genome txt files for
-   chromosome X/Y (chrX.txt and chrY.txt) to be used by bedtools makewindows later.
+   This script calls ./scripts/get_chr_length.py for each species and each chromosome, and creates genome txt files for
+   each chromosome (chr1.txt, chr2.txt,..., chrY.txt) to be used by bedtools makewindows later.
 
 3. For each species, create windows of specific size (say, 100kb) by running the following script:
 
