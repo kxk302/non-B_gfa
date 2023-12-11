@@ -12,6 +12,10 @@ def concat_nBMST_output_files(input_dir, output_file, chromosome_name, non_b_dna
   else:
     file_names = glob.glob(path.join(input_dir, chromosome_name + "_" + non_b_dna_type + input_file_extension))
 
+  if len(file_names) == 0:
+    print("No files found!")
+    return
+
   df_all = pd.DataFrame()
 
   for file_name in file_names:
