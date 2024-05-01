@@ -14,6 +14,7 @@ echo "InputFastaFile: <$InputFastaFile>"
 echo "OutputFilePrefix <$OutputFilePrefix>"
 echo "OutputDir <$OutputDir>"
 
-./gfa -seq $InputFastaFile -out $OutputFilePrefix
+# Skip GQ and we use Quadron for that
+./gfa -seq $InputFastaFile -out $OutputFilePrefix -skipGQ
 find . -maxdepth 1 -iname "${OutputFilePrefix}_*" -exec mv {} ${OutputDir} \;
 

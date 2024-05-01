@@ -1,6 +1,6 @@
 Simple Logistic Regression
 
-1. Suppoe non-B_gfa is cloned into <MyWorkspace> directory. Create the following input directory structure in
+1. Suppose non-B_gfa is cloned into <MyWorkspace> directory. Create the following input directory structure in
    <MyWorkspace>/non-B_gfa directory. For each species, copy the chrX and chrY new onto old mapping data files
    to the appropriate seqs_srcdir folder.
 

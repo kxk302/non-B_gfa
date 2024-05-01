@@ -41,7 +41,7 @@
 
 7. For each species, create a non-B DNA density file, by running the following command:
 
-   ./scripts/create_density_files.sh
+   ./scripts/create_density_files.sh ./output/
 
    This script calls 'bedtools coverage', for each species and chromosome, and for each non-B DNA type AND all of
    the non-b DNA types combined, to create intermediate density files, then aggregates them by calling

@@ -18,6 +18,6 @@ if __name__ == "__main__":
   argParser = argparse.ArgumentParser("Create density file")
   argParser.add_argument("-i", "--input_file", type=str, required=True)
   argParser.add_argument("-o", "--output_file", type=str, required=True)
-  argParser.add_argument("-c", "--chromosome_name", type=str, required=True, choices=["chrX", "chrY"])
+  argParser.add_argument("-c", "--chromosome_name", type=str, required=True)
   args = argParser.parse_args()
   create_density_file(args.input_file, args.output_file, args.chromosome_name)
