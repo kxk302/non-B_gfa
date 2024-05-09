@@ -5,13 +5,13 @@
 2. There are 8 files for Bonobo, Gorilla, Bornean Orangutan, Sumataran Orangutan, Chimpanzee, Siamang, CHM13 and HG002.
 
 3. Run ./scripts/create_repeat_files.sh (Calls 'create_repeat_files.py' for each species) to create repeat files (for
-   61 repeat type listed in create_repeat_files.py), for chrX and chrY, for each species listed in step 2. We used CHM13
-   for Human. This scripts uses the RepeatMasker files as input, and generates repeat files in ./repeats/<species> folder.
-   For 5 "Satellite*" and "Unspecified" repeat types, the script creates a file for each sub-type. The list of sub-types
+   61 repeat type listed in create_repeat_files.py), for chr1 to chr24, chrX and chrY, for each species listed in step 2.
+   We used CHM13 for Human. This scripts uses the RepeatMasker files as input, and generates repeat files in ./repeats/<species>
+   folder. For 5 "Satellite*" and "Unspecified" repeat types, the script creates a file for each sub-type. The list of sub-types
    for each 5 "Satellite*" and "Unspecified" repeat types can be found in REPEAT_SUBLABELS variable in
    ./scripts/create_repeat_files.py. There are a total of 27 sub-types for "Satellite*" and "Unspecified" repeat types, hence,
-   54 files for chromosomes X and Y are created. For the remaining 55 repeat types, 110 files are created for chromosomes X and Y
-   Hence, the number of files created for each species is  110 + 54 = 164.
+   27*26=702 files for chromosomes 1 to 24, and X and Y are created. For the remaining 55 repeat types, 55*26=1430 files are
+   created for chromosomes 1 to 24 and X and Y. Hence, the number of files created for each species is  1430 + 702 = 2132.
 
 4. Run ./scripts/merge_repeat_files.sh (Calls 'bedtools merge' for each species' repeat files) to combine overlapping
    intervals, to avoid double counting them. The output file will have '_merged' added to their name, right before the
@@ -27,8 +27,8 @@
 
 6. Run ./scripts/intersect_repeat_files.sh (Calls 'intersect_repeat_file.sh' for each species). For each species,
    intersect_repeat_file.sh calls 'bedtools intersect' to find the overlaps between a repeat file and each of non-B
-   DNA annotations APR, DR, GQ, IR, MR, STR, and Z. We have 164 repeat files for each species, and since there are 7
-   non-B DNA types, intersect_repeat_files.sh creates 1148 intersect files.
+   DNA annotations APR, DR, GQ, IR, MR, STR, and Z. We have 2132 repeat files for each species, and since there are 7
+   non-B DNA types, intersect_repeat_files.sh creates 14924 intersect files.
 
 7. Run ./scripts/summarize_repeats.sh (Calls 'summarize_repeats.py' for each species). For each species, and for each repeat
    type, sum up the length of intervals specified in the merged repeat files from step 4; For each species, this generates a

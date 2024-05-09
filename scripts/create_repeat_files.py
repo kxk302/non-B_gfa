@@ -104,10 +104,10 @@ REPEAT_SUBLABELS[REPEAT_LABELS.index("Satellite/acro")]=["6kbHsap", "ACRO1"]
 REPEAT_SUBLABELS[REPEAT_LABELS.index("Satellite/centr")]=["SST1", "ALR/Alpha", "HSAT4", "GSATX", "GSATII", "GSAT"]
 REPEAT_SUBLABELS[REPEAT_LABELS.index("Satellite/subtelo")]=["TAR1"]
 
-CHROMOSOMES = ["chrX", "chrY"]
+CHROMOSOMES = ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr20", "chr21", "chr22", "chr23", "chr24", "chrX", "chrY"]
 
 def create_repeat_files(species, repeats_file, output_folder):
-  repeats_df = pd.read_csv(repeats_file, sep="\t", usecols=REPEATS_FILE_COLUMNS, names=REPEATS_COLUMN_NAMES)
+  repeats_df = pd.read_csv(repeats_file, sep="\s+", usecols=REPEATS_FILE_COLUMNS, names=REPEATS_COLUMN_NAMES)
 
   for index, label in enumerate(REPEAT_LABELS):
     for chromosome in CHROMOSOMES:
@@ -116,14 +116,14 @@ def create_repeat_files(species, repeats_file, output_folder):
 
       if sub_labels == "":
         df_label = repeats_df[ (repeats_df.label == label) &
-                               (repeats_df.chromosome == chromosome) ]
+                               (repeats_df.chromosome.str.startswith(chromosome+"_")) ]
         output_file_path = path.join(output_folder, species, chromosome + "_" + label.replace("/", "_") + ".bed")
         df_label.to_csv(output_file_path, columns=["chromosome", "start", "stop"], header=False, index=False, sep="\t")
       else:
         for sub_label in sub_labels:
           df_label = repeats_df[ (repeats_df.label == label) &
                                  (repeats_df.sub_label.str.startswith(sub_label)) &
-                                 (repeats_df.chromosome == chromosome) ]
+                                 (repeats_df.chromosome.str.startswith(chromosome+"_")) ]
           output_file_path = path.join(output_folder, species, chromosome + "_" + label.replace("/", "_") + "_" + sub_label.replace("/", "_") + ".bed")
           df_label.to_csv(output_file_path, columns=["chromosome", "start", "stop"], header=False, index=False, sep="\t")
 

@@ -15,6 +15,7 @@ cd $RepeatsFolder
 for folder in "Bonobo" "Chimpanzee" "Human" "Gorilla" "B_Orangutan" "S_Orangutan" "Siamang"
 do
   cd $folder;
-  for file in $(ls *.bed); do bedtools merge -i $file > "${file/.bed/_merged.bed}"; done
+  mkdir -p merged;
+  for file in $(ls *.bed); do bedtools merge -i $file > merged/"${file/.bed/_merged.bed}"; done
   cd -;
 done

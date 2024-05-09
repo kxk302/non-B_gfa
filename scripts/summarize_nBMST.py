@@ -22,7 +22,7 @@ species_dict = {
 non_b_dna_types = ["A-Phased Repeats", "Short Tandem Repeats", "Direct Repeats",
                    "Mirror Repeats", "Inverted Repeats", "G-Quadruplex", "Z DNA", "All"]
 
-chromosomes = ["chrX", "chrY"]
+chromosomes = ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr20", "chr21", "chr22", "chr23", "chr24", "chrX", "chrY"]
 
 Homo_sapiens_chrX_index = "NC_060947.1 Homo sapiens isolate CHM13 chromosome X, alternate assembly T2T-CHM13v2.0"
 Homo_sapiens_chrY_index = "NC_060948.1 Homo sapiens isolate NA24385 chromosome Y, alternate assembly T2T-CHM13v2.0"
