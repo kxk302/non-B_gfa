@@ -51,54 +51,62 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   repeats_length_sum = pd.Series(data=zero_list, index=get_repeat_indexes())
   intersect_length_sum = pd.DataFrame(data=data, index=get_repeat_indexes())
 
-  # Populate repeat length Series. Add chrX and chrY values to the same cell.
+  # Populate repeat length Series. Add all chromosome values to the same cell.
   # We'd end up with repeat_types_len values
   for chromosome in chromosomes:
     for index, repeat_type in enumerate(repeat_types):
       if repeat_subtypes[index] == "":
-        file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_merged.bed")
+        file_path = path.join(repeats_folder, species, "merged", chromosome + "_" + repeat_type.replace("/", "_") + "_merged.bed")
 
         try:
           df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
         except pd.errors.EmptyDataError:
-          print("The TSV file is empty. No need to update repeats length series")
+          print(f"The TSV file {file_apth} is empty. No need to update repeats length series")
+        except FileNotFoundError:
+          print(f"The TSV file {file_path} does not exist")
         else:
           df["length"] = df["stop"] - df["start"] + 1
           repeats_length_sum.loc[repeat_type] += df["length"].sum()
       else:
         for repeat_subtype in repeat_subtypes[index]:
-          file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_" + repeat_subtype.replace("/", "_") + "_merged.bed")
+          file_path = path.join(repeats_folder, species, "merged", chromosome + "_" + repeat_type.replace("/", "_") + "_" + repeat_subtype.replace("/", "_") + "_merged.bed")
 
           try:
             df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
           except pd.errors.EmptyDataError:
-            print("The TSV file is empty. No need to update repeats length series")
+            print(f"The TSV file {file_apth} is empty. No need to update repeats length series")
+          except FileNotFoundError:
+            print(f"The TSV file {file_path} does not exist")
           else:
             df["length"] = df["stop"] - df["start"] + 1
             repeats_length_sum.loc[repeat_type + "_" + repeat_subtype] += df["length"].sum()
 
 
-  # Populate intersect length DataFrame. Add chrX and chrY values to the same cell.
+  # Populate intersect length DataFrame. Add all chromosome values to the same cell.
   # We'd end up with repeat_types_len X len(non_b_dna_types) values
   for chromosome in chromosomes:
     for index, repeat_type in enumerate(repeat_types):
       for non_b_dna_type in non_b_dna_types:
         if repeat_subtypes[index] == "":
-          file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_intersect_" + non_b_dna_type + ".bed")
+          file_path = path.join(repeats_folder, species, "intersect", chromosome + "_" + repeat_type.replace("/", "_") + "_intersect_" + non_b_dna_type + ".bed")
           try:
             df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
           except pd.errors.EmptyDataError:
-            print("The TSV file is empty. No need to update intersect length dataframe")
+            print(f"The TSV file {file_apth} is empty. No need to update repeats length series")
+          except FileNotFoundError:
+            print(f"The TSV file {file_path} does not exist")
           else:
             df["length"] = df["stop"] - df["start"] + 1
             intersect_length_sum.loc[repeat_type, non_b_dna_type] += df["length"].sum()
         else:
           for repeat_subtype in repeat_subtypes[index]:
-            file_path = path.join(repeats_folder, species, chromosome + "_" + repeat_type.replace("/", "_") + "_" + repeat_subtype.replace("/", "_") +  "_intersect_" + non_b_dna_type + ".bed")
+            file_path = path.join(repeats_folder, species, "intersect", chromosome + "_" + repeat_type.replace("/", "_") + "_" + repeat_subtype.replace("/", "_") +  "_intersect_" + non_b_dna_type + ".bed")
             try:
               df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop"])
             except pd.errors.EmptyDataError:
-              print("The TSV file is empty. No need to update intersect length dataframe")
+              print(f"The TSV file {file_apth} is empty. No need to update repeats length series")
+            except FileNotFoundError:
+              print(f"The TSV file {file_path} does not exist")
             else:
               df["length"] = df["stop"] - df["start"] + 1
               intersect_length_sum.loc[repeat_type + "_" + repeat_subtype, non_b_dna_type] += df["length"].sum()
@@ -118,8 +126,8 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   #
   # Add column with the number of repeat elements in each category, per species
   #
-  repeats_file = path.join(repeats_folder, "input", species_to_folder_dict[species] + "_FinalAnnotations_June2023_v2.sort.out")
-  repeats_df = pd.read_csv(repeats_file, sep="\t", usecols=REPEATS_FILE_COLUMNS, names=REPEATS_COLUMN_NAMES)
+  repeats_file = path.join(repeats_folder, "input", species_to_folder_dict[species] + ".out")
+  repeats_df = pd.read_csv(repeats_file, sep="\s+", usecols=REPEATS_FILE_COLUMNS, names=REPEATS_COLUMN_NAMES)
   repeats_df_no_subtype = repeats_df[~repeats_df.label.isin(repeats_with_subtypes)]
   number_of_repeat_types = repeats_df_no_subtype['label'].value_counts().sort_index()
 
@@ -220,27 +228,39 @@ def add_missing_indexes(repeat_types_series):
 def get_average_non_b_dna_density(nbmst_output_folder):
   zero_list = [0.00] * len(non_b_dna_types)
   average_non_b_dna_density = pd.Series(data=zero_list, index=non_b_dna_types)
+  total_length = 0
 
-  # Read chrX and chrY lengths and add them to get total length
-  chrX_file_path = path.join(nbmst_output_folder, "chrX.txt")
-  chrY_file_path = path.join(nbmst_output_folder, "chrY.txt")
+  # Read chr1 to chr24, and chrX and chrY lengths and add them to get total length
+  for chromosome in chromosomes:
+    chr_file_path = path.join(nbmst_output_folder, chromosome+".txt")
 
-  df_chr_x = pd.read_csv(chrX_file_path, sep="\t", names=["chr","length"])
-  df_chr_y = pd.read_csv(chrY_file_path, sep="\t", names=["chr","length"])
+    try:
+      df_chr = pd.read_csv(chr_file_path, sep="\t", names=["chr","length"])
+    except pd.errors.EmptyDataError:
+      print(f"The TSV file {chr_file_apth} is empty. No need to update total length series")
+    except FileNotFoundError:
+      print(f"The TSV file {chr_file_path} does not exist")
 
-  total_length = (df_chr_x["length"] + df_chr_y["length"])[0]
+    total_length += df_chr["length"][0]
 
-  # For each non-B DNA type, and for chrX and chrY, add the
-  # non-B DNA total length to the series
+  # For each non-B DNA type, and for chr1 to chr24, and chrX and chrY,
+  # add the non-B DNA total length to the series
   for non_b in non_b_dna_types:
     for chr in chromosomes:
       file_path = path.join(nbmst_output_folder, chr + "_" + non_b + ".bed")
-      non_b_df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop", "strand"])
+
+      try:
+        non_b_df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop", "strand"])
+      except pd.errors.EmptyDataError:
+        print(f"The TSV file {file_apth} is empty. No need to update nonB DNA density series")
+      except FileNotFoundError:
+        print(f"The TSV file {file_path} does not exist")
+
       non_b_df["length"] = non_b_df["stop"] - non_b_df["start"]  + 1
       average_non_b_dna_density[non_b] += non_b_df["length"].sum()
 
-  # Divide non-B DNA total length (for both chrX and chrY) by total length
-  # (for both chrX and chrY), so non-B DNA total length is normalized
+  # Divide non-B DNA total length (for all chromosomes) by total length
+  # (for all chromosomes), so non-B DNA total length is normalized
   print(f'total_length: {total_length}')
   print(f'average_non_b_dna_density: {average_non_b_dna_density}')
   print(f'average_non_b_dna_density.div(total_length): {average_non_b_dna_density.div(total_length)}')
