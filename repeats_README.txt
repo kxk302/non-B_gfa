@@ -1,13 +1,14 @@
-1. The RepeatMasker files we got from Gabby Hartley (from Rachel O'Neill's group at UConn) are in this directory:
+1. The RepeatMasker files we got from Jessica Storer (from Rachel O'Neill's group at UConn) are in this directory:
 
-   /nfs/brubeck.bx.psu.edu/scratch6/makova_lab/downloads/primate_T2T/assemblies/annotations/repeatannotations_final/
+   /nfs/brubeck.bx.psu.edu/scratch6/makova_lab/downloads/primate_T2T/assemblies/annotations/repeatannotations_final/all_chromosomes
 
-2. There are 8 files for Bonobo, Gorilla, Bornean Orangutan, Sumataran Orangutan, Chimpanzee, Siamang, CHM13 and HG002.
+2. There are 7 files for Bonobo, Gorilla, Bornean Orangutan, Sumataran Orangutan, Chimpanzee, Siamang, and CHM13. Copy the
+   files to ./repeats/input folder.
 
 3. Run ./scripts/create_repeat_files.sh (Calls 'create_repeat_files.py' for each species) to create repeat files (for
    61 repeat type listed in create_repeat_files.py), for chr1 to chr24, chrX and chrY, for each species listed in step 2.
-   We used CHM13 for Human. This scripts uses the RepeatMasker files as input, and generates repeat files in ./repeats/<species>
-   folder. For 5 "Satellite*" and "Unspecified" repeat types, the script creates a file for each sub-type. The list of sub-types
+   This scripts uses the RepeatMasker files as input, and generates repeat files in ./repeats/<species> folder. For 5
+   "Satellite*" and "Unspecified" repeat types, the script creates a file for each sub-type. The list of sub-types
    for each 5 "Satellite*" and "Unspecified" repeat types can be found in REPEAT_SUBLABELS variable in
    ./scripts/create_repeat_files.py. There are a total of 27 sub-types for "Satellite*" and "Unspecified" repeat types, hence,
    27*26=702 files for chromosomes 1 to 24, and X and Y are created. For the remaining 55 repeat types, 55*26=1430 files are
