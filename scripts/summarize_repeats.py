@@ -250,7 +250,8 @@ def get_average_non_b_dna_density(nbmst_output_folder):
       file_path = path.join(nbmst_output_folder, chr + "_" + non_b + ".bed")
 
       try:
-        non_b_df = pd.read_csv(file_path, sep="\t", names=["chr", "start", "stop", "strand"])
+        print(f"Reading {file_path}")
+        non_b_df = pd.read_csv(file_path, sep="\t", usecols= [0,1,2], names=["chr", "start", "stop"])
       except pd.errors.EmptyDataError:
         print(f"The TSV file {file_apth} is empty. No need to update nonB DNA density series")
       except FileNotFoundError:
