@@ -34,14 +34,16 @@ input/aggregate_fasta_files/
 ├── mPonPyg2.pri.cur.20231122.fasta
 └── mSymSyn1.pri.cur.20231122.fasta
 
-4. Run the following command to split the aggregate fasta files, so we have 1 fasta file for each chromosome.
+4. For each aggregate fasta file in 'input/aggregate_fasta_files/' folder, run the following command to split the
+   aggregate fasta files into individual fasta files, so we have one fasta file for each chromosome.
 
-   ./scripts/split_fasta_file.sh .
+   ./scripts/split_fasta_file.sh <AggregateFastaFileName>
 
-   This script takes one input parameter: the 'input' folder's parent directory (which is '.', or current
-   folder, in this case ). This script calls './scripts/split_fasta_file.py' for each species, and places
-   the split fasta files in the appropriate folder. After running the script, the contents of the directory
-   should be as below:
+   After the script runs to completion, move the individual fasta files to the appropriate folder. E.g., if you split
+   'mGorGor1.pri.cur.20231122.fasta', move the individual fasta files to './input/Gorilla_gorilla/seqs_srcdir'. Then
+   for each individual fasta file, standardize the name. E.g., rename 'chr1_pat_hsa1.fasta' into 'chr1.fa'. After running
+   the script for all aggregate fasta files, moving the individual fasta files to the appropriate folder, and standardizing
+   individual fasta file names, the the contents of the directory should be as below:
 
 input/
 ├── Gorilla_gorilla
