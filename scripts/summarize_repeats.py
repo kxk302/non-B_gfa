@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from create_repeat_files import CHROMOSOMES as chromosomes
+from create_repeat_files import CHROMOSOMES
 from create_repeat_files import REPEATS_FILE_COLUMNS, REPEATS_COLUMN_NAMES
 from create_repeat_files import REPEAT_LABELS as repeat_types
 from create_repeat_files import REPEAT_SUBLABELS as repeat_subtypes
@@ -35,7 +35,7 @@ species_to_folder_dict = {
   "Siamang": "Siamang",
 }
 
-def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file):
+def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file, chromosomes):
   repeat_types_len = get_number_of_repeats(repeat_types, repeat_subtypes)
   zero_list = [0.00] * repeat_types_len
   data = {
@@ -188,7 +188,7 @@ def summarize_repeats(species, repeats_folder, nbmst_output_folder, output_file)
   #   This allows us to detect enrichment, i.e., cases where density in a certain cell is higher than the non-B DNA density
   # Add non-B density per non-B type as a new row
   #
-  average_non_b_dna_density = get_average_non_b_dna_density(nbmst_output_folder)
+  average_non_b_dna_density = get_average_non_b_dna_density(nbmst_output_folder, chromosomes)
   average_non_b_dna_density_list = average_non_b_dna_density.tolist()
   print(f'average_non_b_dna_density_list: {average_non_b_dna_density_list}')
 
@@ -225,7 +225,7 @@ def add_missing_indexes(repeat_types_series):
   return repeat_types_series
 
 
-def get_average_non_b_dna_density(nbmst_output_folder):
+def get_average_non_b_dna_density(nbmst_output_folder, chromosomes):
   zero_list = [0.00] * len(non_b_dna_types)
   average_non_b_dna_density = pd.Series(data=zero_list, index=non_b_dna_types)
   total_length = 0
@@ -288,7 +288,15 @@ if __name__ == "__main__":
   argParser.add_argument("-f", "--repeats_folder", type=str, required=True)
   argParser.add_argument("-n", "--nbmst_output_folder", type=str, required=True)
   argParser.add_argument("-o", "--output_file", type=str, required=True)
+  argParser.add_argument("-c", "--chromosome", type=str)
 
   args = argParser.parse_args()
 
-  summarize_repeats(args.species, args.repeats_folder, args.nbmst_output_folder, args.output_file)
+  # Summarize for aggregate of all chromosomes
+  if args.chromosome is None:
+     chromosomes = CHROMOSOMES
+  # Summarize for individual chromosome
+  else:
+     chromosomes = [args.chromosome]
+
+  summarize_repeats(args.species, args.repeats_folder, args.nbmst_output_folder, args.output_file, chromosomes)
