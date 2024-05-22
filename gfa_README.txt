@@ -37,7 +37,7 @@ input/aggregate_fasta_files/
 4. For each aggregate fasta file in 'input/aggregate_fasta_files/' folder, run the following command to split the
    aggregate fasta files into individual fasta files, so we have one fasta file for each chromosome.
 
-   ./scripts/split_fasta_file.sh <AggregateFastaFileName>
+   ./scripts/split_fasta_files.sh <AggregateFastaFileName>
 
    After the script runs to completion, move the individual fasta files to the appropriate folder. E.g., if you split
    'mGorGor1.pri.cur.20231122.fasta', move the individual fasta files to './input/Gorilla_gorilla/seqs_srcdir'. Then
