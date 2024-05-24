@@ -4,9 +4,9 @@
 
    This creates a non-B_gfa folder in <MyWorkspace> directory
 
-2. Activate the Python virtual environment via the following command:
+2. Create a virtual environment called 'venv', then activate the virtual environment, and install the necessary packages via the following commands:
 
-   . ./venv/bin/activate 
+    python3 -m venv venv; . ./venv/bin/activate; pip install -r requirements.txt;
 
 3. Create the following directory structure in <MyWorkspace> directory.
 
