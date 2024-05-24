@@ -4,11 +4,13 @@
 
    This creates a non-B_gfa folder in <MyWorkspace> directory
 
-2. Create a virtual environment called 'venv', then activate the virtual environment, and install the necessary packages via the following commands:
+2. In '<MyWorkspace>/non-B_gfa' folder, run 'make' to generate the gfa executable, called 'gfa'.
+
+3. Create a virtual environment called 'venv', then activate the virtual environment, and install the necessary packages via the following commands:
 
     python3 -m venv venv; . ./venv/bin/activate; pip install -r requirements.txt;
 
-3. Create the following directory structure in <MyWorkspace> directory.
+4. Create the following directory structure in <MyWorkspace> directory.
 
 input/
 ├── Gorilla_gorilla
@@ -25,7 +27,7 @@ input/
 │   └── seqs_srcdir
 └── aggregate_fasta_files
 
-4. Copy the aggregate fasta files from brubeck to '<MyWorkspace>/input/aggregate_fasta_files' directory.
+5. Copy the aggregate fasta files from brubeck to '<MyWorkspace>/input/aggregate_fasta_files' directory.
    Aggregate fasta files are in '/nfs/brubeck.bx.psu.edu/scratch4/makova_lab/downloads/primate_T2T/assemblies/v2'
    folder on brubeck. After copying the files, the contents of the directory should be as below:
 
@@ -39,7 +41,7 @@ input/aggregate_fasta_files/
 ├── mPonPyg2.pri.cur.20231122.fasta
 └── mSymSyn1.pri.cur.20240514.fasta
 
-5. For each aggregate fasta file in 'input/aggregate_fasta_files/' folder, run the following command to split the
+6. For each aggregate fasta file in 'input/aggregate_fasta_files/' folder, run the following command to split the
    aggregate fasta files into individual fasta files, so we have one fasta file for each chromosome.
 
    ./scripts/split_fasta_files.sh <AggregateFastaFileName>
@@ -47,7 +49,7 @@ input/aggregate_fasta_files/
    After the script runs to completion, move the individual fasta files to the appropriate folder. E.g., if you split
    'mGorGor1.pri.cur.20231122.fasta', move the individual fasta files to './input/Gorilla_gorilla/seqs_srcdir'.
 
-6. Delete the following redundant files:
+7. Delete the following redundant files:
 
    input/Homo_sapiens/seqs_srcdir/chrM.fa
    input/Pan_Paniscus/seqs_srcdir/chr1522_pat_hsa1421_random_utig4-145.fasta
@@ -60,7 +62,7 @@ input/aggregate_fasta_files/
    input/Pongo_abelii/seqs_srcdir/chr18_hap1_hsa16_random_utig4-3743.fasta
    input/Pongo_abelii/seqs_srcdir/chr18_hap1_hsa16_random_utig4-3745.fasta
 
-7. Standardize the name of each individual fasta file, (e.g., rename 'chr1_pat_hsa1.fasta' into 'chr1.fa') by running
+8. Standardize the name of each individual fasta file, (e.g., rename 'chr1_pat_hsa1.fasta' into 'chr1.fa') by running
    the following script in every ./input/<species>/seq_srcdir
 
    for file in $(ls *.fasta);do mv ${file} ${file/_*.fasta/.fa};done
@@ -120,7 +122,7 @@ input/
 │       ├── chrX.fa
 │       └── chrY.fa
 
-8. Standardize the chromosome name in .fa files by running the following script in
+9. Standardize the chromosome name in .fa files by running the following script in
    every ./input/<species>/seq_srcdir:
 
    for file in $(ls *.fa); do sed -i '' 's/_.*//' $file;done
@@ -128,7 +130,7 @@ input/
    This script, for example, changes '>chr1_pat_hsa1' to '>chr1' in 'Gorilla_gorilla/seqs_srcdir/chr1.fa'.
    We need standardized chromosome names for './scripts/get_chr_length.sh' to work properly.
 
-9. Create the following output directory structure in <MyWorkspace>/non-B_gfa directory.
+10. Create the following output directory structure in <MyWorkspace>/non-B_gfa directory.
 
 output/
 ├── Gorilla_gorilla
@@ -139,5 +141,5 @@ output/
 ├── Pongo_pygmaeus
 └── Symphalangus_syndactylus
 
-10. Run ./scripts/run_nBMSTs.sh. This script calls ./scripts/run_nBMST.sh for each species and each chromosome.
+11. Run ./scripts/run_nBMSTs.sh. This script calls ./scripts/run_nBMST.sh for each species and each chromosome.
    For each species, the output files are copied to the appropriate output folder.
